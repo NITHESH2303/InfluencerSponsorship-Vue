@@ -1,47 +1,64 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  <div id="app">
+    <header>
+      <h1>Influencer Sponsorship Platform</h1>
+      <nav>
+        <router-link to="/signup">Sign Up</router-link>
+        <router-link to="/login">Login</router-link>
+        <!-- Add more links as needed -->
+      </nav>
+    </header>
+    <main>
+      <router-view />
+    </main>
+    <footer>
+      <p>&copy; Mad the MAD2</p>
+    </footer>
+  </div>
 </template>
 
+<script>
+export default {
+  name: 'App',
+};
+</script>
+
 <style scoped>
+
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 20px;
+}
+
 header {
-  line-height: 1.5;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+nav {
+  margin-top: 10px;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+nav a {
+  margin: 0 15px;
+  text-decoration: none;
+  color: #007bff;
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+nav a:hover {
+  text-decoration: underline;
+}
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+main {
+  padding: 20px;
+}
+
+footer {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f1f1f1;
 }
 </style>
