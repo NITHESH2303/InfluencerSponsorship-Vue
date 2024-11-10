@@ -12,6 +12,7 @@
 
 <script>
 import TextInput from "@/components/TextInput.vue";
+import {fetchWithAuth} from "@/api.js";
 
 export default {
   components: { TextInput },
@@ -35,7 +36,7 @@ export default {
       this.error = '';
       if (this.validationErrors.length === 0) {
         try {
-          const response = await fetch("http://127.0.0.1:5000/api/auth/login", {
+          const response = await fetchWithAuth("http://127.0.0.1:5000/api/auth/login", {
             method: "POST",
             body: JSON.stringify({
               identifier: this.identifier,
@@ -48,6 +49,14 @@ export default {
           if (response.ok) {
             const data = await response.json();
             localStorage.setItem('access_token', data.data.access_token);
+            localStorage.setItem('role', data.data.role);
+            if (data.data.user.role === 'sponsor') {
+              this.$router.push('/sponsor-dashboard');
+            } else if (data.data.user.role === 'influencer') {
+              this.$router.push('/influencer-dashboard');
+            } else if (data.data.user.role === 'admin') {
+              this.$router.push('/admin/overview');
+            }
             this.$router.push('/home');
           } else if (response.status === 400) {
             const errorData = await response.json();
