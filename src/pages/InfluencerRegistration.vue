@@ -30,6 +30,7 @@
 
 <script>
 import TextInput from "@/components/TextInput.vue";
+import {fetchWithAuth} from "@/api.js";
 
 export default {
   components: {TextInput},
@@ -69,7 +70,7 @@ export default {
       try {
         const filledProfiles = this.social_media_profiles.filter(profile => profile.platform && profile.username);
         const accesstoken = localStorage.getItem('access_token');
-        const response = await fetch("http://127.0.0.1:5000/api/register/influencer", {
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/register/influencer", {
           method: "POST",
           body: JSON.stringify({
             social_media_profiles: filledProfiles,

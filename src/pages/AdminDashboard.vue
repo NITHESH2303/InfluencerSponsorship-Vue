@@ -16,7 +16,9 @@
       <h2>Pending Sponsor Approvals</h2>
       <ul v-if="pendingSponsors.length > 0">
         <li v-for="sponsor in pendingSponsors" :key="sponsor.id">
-          {{ sponsor.name }}
+          {{sponsor.company_name}}
+          {{ sponsor.username }}
+          {{sponsor.industry_type}}
           <button @click="approveSponsor(sponsor.id)">Approve</button>
         </li>
       </ul>
@@ -28,6 +30,8 @@
 </template>
 
 <script>
+import {fetchWithAuth} from "@/api.js";
+
 export default {
   data() {
     return {
@@ -39,7 +43,7 @@ export default {
   methods: {
     async fetchOverviewStats() {
       try {
-        const response = await fetch("http://127.0.0.1:5000/api/admin/overview");
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/admin/overview");
         if (response.ok) {
           const data = await response.json();
           this.overviewStats = data.data;
@@ -52,7 +56,7 @@ export default {
     },
     async fetchPendingSponsors() {
       try {
-        const response = await fetch("http://127.0.0.1:5000/api/admin/operation/approve_sponsor");
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/admin/operation/sponsor_approval");
         if (response.ok) {
           const data = await response.json();
           this.pendingSponsors = data.data;
@@ -65,15 +69,12 @@ export default {
     },
     async approveSponsor(sponsorId) {
       try {
-        const response = await fetch(`http://127.0.0.1:5000/api/admin/operation/approve_sponsor/${sponsorId}`, {
+        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/admin/operation/approve_sponsor/${sponsorId}`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          }
         });
 
         if (response.ok) {
-          this.pendingSponsors = this.pendingSponsors.filter(sponsor => sponsor.id !== sponsorId);
+          this.pendingSponsors = this.pendingSponsors.filter(sponsor => sponsor.userid !== sponsorId);
         } else {
           const errorData = await response.json();
           this.error = errorData.data.message || "Failed to approve sponsor.";

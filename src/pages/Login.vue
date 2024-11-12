@@ -49,15 +49,19 @@ export default {
           if (response.ok) {
             const data = await response.json();
             localStorage.setItem('access_token', data.data.access_token);
-            localStorage.setItem('role', data.data.role);
-            if (data.data.user.role === 'sponsor') {
-              this.$router.push('/sponsor-dashboard');
-            } else if (data.data.user.role === 'influencer') {
-              this.$router.push('/influencer-dashboard');
-            } else if (data.data.user.role === 'admin') {
+            const roles = data.data.user.role;
+            // console.log(typeof(roles));
+            // console.log(roles.includes('admin'));
+            localStorage.setItem('role', JSON.stringify(roles));
+            if (roles.includes('sponsor')) {
+              this.$router.push('/sponsor/dashboard');
+            } else if (roles.includes('influencer')) {
+              this.$router.push('/influencer/dashboard');
+            } else if (roles.includes('admin')) {
               this.$router.push('/admin/overview');
+            } else {
+              this.$router.push('/home');
             }
-            this.$router.push('/home');
           } else if (response.status === 400) {
             const errorData = await response.json();
             this.error = errorData.message || 'An error occurred during login.';

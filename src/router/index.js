@@ -25,11 +25,12 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const isAuthenticated = !!localStorage.getItem('access_token');
     const userRole = localStorage.getItem('role');
+    console.log(userRole);
 
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!isAuthenticated) {
             next({ name: 'Login' });
-        } else if (to.meta.role && to.meta.role !== userRole) {
+        } else if (to.meta.role && !userRole.includes(to.meta.role)) {
             next({ name: 'Unauthorized' });
         } else {
             next();
