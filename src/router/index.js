@@ -6,6 +6,8 @@ import InfluencerRegistration from "@/pages/InfluencerRegistration.vue";
 import SponsorRegistration from "@/pages/SponsorRegistration.vue";
 import SponsorDashboard from "@/pages/SponsorDashboard.vue";
 import Unauthorized from "@/pages/Unauthorized.vue";
+import CreateCampaign from "@/pages/CreateCampaign.vue";
+import {checkSponsorVerified} from "@/router/authGuards.js";
 
 const routes = [
     { path: '/signup', name: 'SignUp', component: SignUp },
@@ -14,7 +16,8 @@ const routes = [
     { path: '/influencer/register', name: 'InfluencerRegistration', component: InfluencerRegistration },
     { path: '/sponsor/register', name: 'SponsorRegistration', component: SponsorRegistration },
     { path: '/admin/overview', name: 'AdminOverview', component: AdminDashboard, meta: { requiresAuth: true, role: 'admin' } },
-    { path: '/sponsor/dashboard', name: 'SponsorDashboard', component: SponsorDashboard, meta: { requiresAuth: true, role: 'sponsor' } },
+    { path: '/sponsor/dashboard', name: 'SponsorDashboard', component: SponsorDashboard, meta: { requiresAuth: true, role: 'sponsor' }, beforeEnter: checkSponsorVerified },
+    { path:  '/campaign/create', name: 'CreateCampaign', component: CreateCampaign, meta: { requiresAuth: true, role: 'sponsor' }, beforeEnter: checkSponsorVerified },
 ];
 
 const router = createRouter({
@@ -25,7 +28,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const isAuthenticated = !!localStorage.getItem('access_token');
     const userRole = localStorage.getItem('role');
-    console.log(userRole);
+    // console.log(userRole);
 
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!isAuthenticated) {

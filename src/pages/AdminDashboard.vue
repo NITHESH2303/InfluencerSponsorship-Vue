@@ -15,11 +15,13 @@
     <section class="pending-approvals">
       <h2>Pending Sponsor Approvals</h2>
       <ul v-if="pendingSponsors.length > 0">
-        <li v-for="sponsor in pendingSponsors" :key="sponsor.id">
+        <li v-for="sponsor in pendingSponsors" :key="sponsor.sponsorid">
           {{sponsor.company_name}}
           {{ sponsor.username }}
           {{sponsor.industry_type}}
-          <button @click="approveSponsor(sponsor.id)">Approve</button>
+          <button v-if="sponsor.verification_status === sponsorStatus.not_verified" @click="approveSponsor(sponsor.sponsorid)">Verify Initiation</button>
+          <button v-else-if="sponsor.verification_status === sponsorStatus.verification_initiated" @click="approveSponsor(sponsor.sponsorid)">Mark As Verified</button>
+<!--          <button v-else @click="approveSponsor(sponsor.sponsorid)">Approve</button>-->
         </li>
       </ul>
       <p v-else>No pending sponsors for approval.</p>
@@ -35,6 +37,11 @@ import {fetchWithAuth} from "@/api.js";
 export default {
   data() {
     return {
+      sponsorStatus: {
+        not_verified: 0,
+        verification_initiated: 1,
+        verified: 2
+      },
       overviewStats: null,
       pendingSponsors: [],
       error: ""
@@ -44,8 +51,10 @@ export default {
     async fetchOverviewStats() {
       try {
         const response = await fetchWithAuth("http://127.0.0.1:5000/api/admin/overview");
+        console.log(response);
         if (response.ok) {
           const data = await response.json();
+          console.log(data);
           this.overviewStats = data.data;
         } else {
           this.error = "Failed to fetch overview stats.";
@@ -74,7 +83,7 @@ export default {
         });
 
         if (response.ok) {
-          this.pendingSponsors = this.pendingSponsors.filter(sponsor => sponsor.userid !== sponsorId);
+          this.pendingSponsors = this.pendingSponsors.filter(sponsor => sponsor.verification_status !== "2");
         } else {
           const errorData = await response.json();
           this.error = errorData.data.message || "Failed to approve sponsor.";

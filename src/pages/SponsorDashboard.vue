@@ -10,6 +10,7 @@
 <script>
 import CampaignStats from "@/components/CampaignStats.vue";
 import CampaignList from "@/components/CampaignList.vue";
+import {fetchWithAuth} from "@/api.js";
 
 export default {
   components: { CampaignStats, CampaignList },
@@ -25,18 +26,15 @@ export default {
   },
   methods: {
     async fetchCampaignData() {
+      const token = localStorage.getItem('access_token');
       try {
-        const accessToken = localStorage.getItem("access_token");
-        const response = await fetch("http://127.0.0.1:5000/api/sponsor/campaigns", {
-          headers: {
-            "Authorization": `Bearer ${accessToken}`,
-            "Content-Type": "application/json"
-          }
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/campaigns", {
+          method: "GET",
         });
         if (response.ok) {
           const data = await response.json();
           this.campaigns = data.campaigns;
-          this.campaignStats = data.stats;  // Assuming the API returns some stats data
+          this.campaignStats = data.stats;
         } else {
           this.error = "Failed to load campaigns.";
         }
@@ -45,7 +43,7 @@ export default {
       }
     },
     createNewCampaign() {
-      this.$router.push("/create-campaign");
+      this.$router.push("/campaign/create");
     }
   }
 };

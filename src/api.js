@@ -1,12 +1,19 @@
 export async function fetchWithAuth(url, options = {}) {
     const token = localStorage.getItem('access_token');
-    options.headers = {
+    const headers = {
         ...options.headers,
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        Accept: 'application/json',
     };
 
-    let response = await fetch(url, options);
+    const fetchOptions = {
+        ...options,
+        headers,
+        credentials: "include",
+    };
+
+    let response = await fetch(url, fetchOptions);
 
     if (response.status === 401) {
         const refreshSuccess = await refreshAccessToken();
