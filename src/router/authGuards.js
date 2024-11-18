@@ -2,19 +2,13 @@ import {fetchWithAuth} from "@/api.js";
 
 export async function checkSponsorVerified(to, from, next) {
     try {
-        const token = localStorage.getItem('access_token');
-        const response = await fetch("http://127.0.0.1:5000/api/sponsor/meta", {
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/sponsor/meta", {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                Accept: 'application/json',
-            }
         });
-        console.log(response);
         if (response.ok) {
             const sponsorMeta = await response.json();
-            console.log(sponsorMeta);
-            if (sponsorMeta.data.is_approved) {
+            if (sponsorMeta.data.verification_status === 2) {
+                to.params.sponsorMeta = sponsorMeta.data;
                 next();
             } else {
                 next({

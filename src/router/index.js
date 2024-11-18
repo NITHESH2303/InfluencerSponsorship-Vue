@@ -8,6 +8,10 @@ import SponsorDashboard from "@/pages/SponsorDashboard.vue";
 import Unauthorized from "@/pages/Unauthorized.vue";
 import CreateCampaign from "@/pages/CreateCampaign.vue";
 import {checkSponsorVerified} from "@/router/authGuards.js";
+import EditCampaign from "@/pages/EditCampaign.vue";
+import DeleteCampaign from "@/components/DeleteCampaign.vue";
+import AdRequest from "@/pages/AdRequest.vue";
+import AdRequestForm from "@/pages/AdRequestForm.vue";
 
 const routes = [
     { path: '/signup', name: 'SignUp', component: SignUp },
@@ -16,8 +20,12 @@ const routes = [
     { path: '/influencer/register', name: 'InfluencerRegistration', component: InfluencerRegistration },
     { path: '/sponsor/register', name: 'SponsorRegistration', component: SponsorRegistration },
     { path: '/admin/overview', name: 'AdminOverview', component: AdminDashboard, meta: { requiresAuth: true, role: 'admin' } },
-    { path: '/sponsor/dashboard', name: 'SponsorDashboard', component: SponsorDashboard, meta: { requiresAuth: true, role: 'sponsor' }, beforeEnter: checkSponsorVerified },
-    { path:  '/campaign/create', name: 'CreateCampaign', component: CreateCampaign, meta: { requiresAuth: true, role: 'sponsor' }, beforeEnter: checkSponsorVerified },
+    { path: '/sponsor/dashboard', name: 'SponsorDashboard', component: SponsorDashboard, meta: { requiresAuth: true, role: 'sponsor' }, beforeEnter: checkSponsorVerified, props: (route) => ({ sponsorMeta: route.params.sponsorMeta })},
+    { path: '/campaign/create', name: 'CreateCampaign', component: CreateCampaign, meta: { requiresAuth: true, role: 'sponsor' }, beforeEnter: checkSponsorVerified, props: (route) => ({ sponsorMeta: route.params.sponsorMeta })},
+    { path: '/campaigns/:campaignId/edit', name: 'EditCampaign', component: EditCampaign, meta: { requiresAuth: true, role: 'sponsor' }, props: (route) => ({campaignId: route.params.campaignId, campaignMeta: route.params.campaignMeta })},
+    { path: '/campaigns/:campaignId/delete', name: 'DeleteCampaign', component: DeleteCampaign, meta: {requiresAuth: true, role: 'sponsor'},props: (route) => ({campaignId: route.params.campaignId, campaignMeta: route.params.campaignMeta })},
+    { path: '/campaigns/:campaignId/ads', name: 'AdRequests', component: AdRequest},
+    { path: '/campaigns/:campaignId/ads/new', name: 'CreateAdRequest', component: AdRequestForm },
 ];
 
 const router = createRouter({
@@ -28,7 +36,6 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const isAuthenticated = !!localStorage.getItem('access_token');
     const userRole = localStorage.getItem('role');
-    // console.log(userRole);
 
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!isAuthenticated) {

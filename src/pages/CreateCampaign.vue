@@ -10,10 +10,6 @@
         <label for="description">Description:</label>
         <textarea v-model="campaign.description" required></textarea>
       </div>
-<!--      <div>-->
-<!--        <label for="audience">Target Audience:</label>-->
-<!--        <input type="text" v-model="campaign.audience" required />-->
-<!--      </div>-->
       <div>
         <label for="budget">Budget:</label>
         <input type="number" v-model="campaign.budget" required />
