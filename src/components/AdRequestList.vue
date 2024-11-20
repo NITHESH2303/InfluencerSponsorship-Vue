@@ -8,7 +8,7 @@
         <span v-else-if="campaign.status === 'active'" class="active-label">Active</span>
         <span v-else class="completed-label">Completed</span>
         <button @click="goToEdit(campaign)" class="edit-button">Edit</button>
-        <DeleteCampaign :campaignId="campaign.campaign_id" :onDeleted="handleDelete" />
+        <DeleteCampaign :campaignId="campaign.campaign_id" :onDeleted="handleDel1ete" />
       </li>
     </ul>
     <p v-if="error" class="error">{{ error }}</p>

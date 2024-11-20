@@ -3,24 +3,16 @@
     <h2>{{ isEdit ? "Edit Ad Request" : "Create Ad Request" }}</h2>
     <form @submit.prevent="submitAdRequest">
       <div>
-        <label for="title">Title:</label>
-        <input type="text" v-model="adRequest.title" required />
+        <label for="request">Title:</label>
+        <input type="text" v-model="adRequest.request" required />
       </div>
       <div>
         <label for="requirements">Requirements:</label>
-        <textarea v-model="adRequest.requirements" required></textarea>
+        <textarea v-model="adRequest.requirement" required></textarea>
       </div>
       <div>
-        <label for="payment">Payment Amount:</label>
-        <input type="number" v-model="adRequest.payment_amount" required />
-      </div>
-      <div>
-        <label for="status">Status:</label>
-        <select v-model="adRequest.status" required>
-          <option value="pending">Pending</option>
-          <option value="accepted">Accepted</option>
-          <option value="rejected">Rejected</option>
-        </select>
+        <label for="amount">Payment Amount:</label>
+        <input type="number" v-model="adRequest.amount" required />
       </div>
       <button type="submit">{{ isEdit ? "Update" : "Create" }}</button>
     </form>
@@ -46,10 +38,9 @@ export default {
     return {
       isEdit: !!this.adRequestId,
       adRequest: {
-        title: "",
-        requirements: "",
-        payment_amount: 0,
-        status: "pending",
+        request: "",
+        requirement: "",
+        amount: 0,
       },
       error: "",
     };
@@ -58,7 +49,7 @@ export default {
     async fetchAdRequest() {
       if (this.isEdit) {
         try {
-          const response = await fetchWithAuth(`http://127.0.0.1:5000/api/ads/${this.adRequestId}`, {
+          const response = await fetchWithAuth(`http://127.0.0.1:5000/api/adrequests/${this.adRequestId}`, {
             method: "GET",
           });
           if (response.ok) {
@@ -74,13 +65,16 @@ export default {
     },
     async submitAdRequest() {
       const url = this.isEdit
-          ? `http://127.0.0.1:5000/api/ads/${this.adRequestId}`
-          : `http://127.0.0.1:5000/api/ads?campaign_id=${this.campaignId}`;
+          ? `http://127.0.0.1:5000/api/adrequests/${this.adRequestId}`
+          : `http://127.0.0.1:5000/api/adrequests`;
       const method = this.isEdit ? "PUT" : "POST";
       try {
         const response = await fetchWithAuth(url, {
           method,
-          body: JSON.stringify(this.adRequest),
+          body: JSON.stringify({
+            ...this.adRequest,
+            campaign_id: this.campaignId,
+          }),
         });
         if (response.ok) {
           this.$router.push(`/campaigns/${this.campaignId}`);
@@ -93,17 +87,7 @@ export default {
     },
   },
   async created() {
-    await this.fetchAdRequest();
+    if (this.isEdit) await this.fetchAdRequest();
   },
 };
 </script>
-
-<style scoped>
-.ad-request-form {
-  padding: 20px;
-}
-
-.error {
-  color: red;
-}
-</style>
