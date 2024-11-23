@@ -7,11 +7,13 @@ import SponsorRegistration from "@/pages/SponsorRegistration.vue";
 import SponsorDashboard from "@/pages/SponsorDashboard.vue";
 import Unauthorized from "@/pages/Unauthorized.vue";
 import CreateCampaign from "@/pages/CreateCampaign.vue";
-import {checkSponsorVerified} from "@/router/authGuards.js";
+import {checkSponsorVerified, getInfluencerMeta} from "@/router/authGuards.js";
 import EditCampaign from "@/pages/EditCampaign.vue";
 import DeleteCampaign from "@/components/DeleteCampaign.vue";
 import AdRequest from "@/pages/AdRequest.vue";
 import AdRequestForm from "@/pages/AdRequestForm.vue";
+import InfluencerDashboard from "@/pages/InfluencerDashboard.vue";
+import CampaignDetails from "@/components/Campaign/CampaignDetails.vue";
 
 const routes = [
     { path: '/signup', name: 'SignUp', component: SignUp },
@@ -21,8 +23,10 @@ const routes = [
     { path: '/sponsor/register', name: 'SponsorRegistration', component: SponsorRegistration },
     { path: '/admin/overview', name: 'AdminOverview', component: AdminDashboard, meta: { requiresAuth: true, role: 'admin' } },
     { path: '/sponsor/dashboard', name: 'SponsorDashboard', component: SponsorDashboard, meta: { requiresAuth: true, role: 'sponsor' }, beforeEnter: checkSponsorVerified, props: (route) => ({ sponsorMeta: route.params.sponsorMeta })},
+    { path: '/influencer/dashboard', name: 'InfluencerDashboard', component: InfluencerDashboard, meta: {requiresAuth: true, role: 'influencer' }, beforeEnter: getInfluencerMeta, props: (route) => ({ influencerMeta: route.params.influencerMeta }) },
     { path: '/campaign/create', name: 'CreateCampaign', component: CreateCampaign, meta: { requiresAuth: true, role: 'sponsor' }, beforeEnter: checkSponsorVerified, props: (route) => ({ sponsorMeta: route.params.sponsorMeta })},
-    { path: '/campaigns/:campaignId/edit', name: 'EditCampaign', component: EditCampaign, meta: { requiresAuth: true, role: 'sponsor' }, props: (route) => ({campaignId: route.params.campaignId, campaignMeta: route.params.campaignMeta })},
+    { path: '/campaigns/:campaignId', name: 'CampaignDetails', component: CampaignDetails, props:(route) => ({ campaignId: route.params.campaignId })},
+    { path: '/campaigns/:campaignId/edit', name: 'EditCampaign', component: EditCampaign, meta: { requiresAuth: true, role: 'sponsor' }, props: (route) => ({campaignId: route.params.campaignId })},
     { path: '/campaigns/:campaignId/delete', name: 'DeleteCampaign', component: DeleteCampaign, meta: {requiresAuth: true, role: 'sponsor'},props: (route) => ({campaignId: route.params.campaignId, campaignMeta: route.params.campaignMeta })},
     { path: '/campaigns/:campaignId/ads', name: 'AdRequests', component: AdRequest},
     { path: '/campaigns/:campaignId/ads/new', name: 'CreateAdRequest', component: AdRequestForm },

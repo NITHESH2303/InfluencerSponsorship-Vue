@@ -4,7 +4,7 @@
     <form @submit.prevent="submitCampaign">
       <div>
         <label for="name">Campaign Name:</label>
-        <input type="text" v-model="campaign.name" required />
+        <input type="text" v-model="campaign.campaign_name" required />
       </div>
       <div>
         <label for="description">Description:</label>
@@ -24,17 +24,18 @@
       </div>
       <div>
         <label for="visibility">Visibility:</label>
-        <select v-model="campaign.visibility" required>
-          <option value="public">Public</option>
-          <option value="private">Private</option>
-        </select>
+        <input type="checkbox" v-model="campaign.visibility" />
+        <span>{{ campaign.visibility ? 'Private' : 'Public' }}</span>
       </div>
       <div>
         <label for="niche">Niche:</label>
-        <input type="text" v-model="campaign.niche" required />
+        <select v-model="campaign.niche" required>
+          <option v-for="niche in this.nicheOptions" :key="niche" :value="niche">{{ niche }}</option>
+        </select>
       </div>
       <button type="submit">Create Campaign</button>
     </form>
+    <p v-if="error" class="error">{{ error }}</p>
   </div>
 </template>
 
@@ -45,32 +46,52 @@ export default {
   data() {
     return {
       campaign: {
-        name: "",
+        campaign_name: "",
         description: "",
         budget: 0,
         start_date: "",
         end_date: "",
-        visibility: "private",
+        visibility: false,
         niche: ""
       },
+      nicheOptions: "",
       error: ""
     };
   },
+  async created() {
+    await this.fetchNicheOptions();
+  },
   methods: {
+    async fetchNicheOptions() {
+      try {
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/niches");
+        if (response.ok) {
+          const niches = await response.json();
+          this.nicheOptions = niches.data;
+        } else {
+          console.error("Failed to load niches.");
+        }
+      } catch (error) {
+        console.error("An error occurred: ", error.message);
+      }
+    },
     async submitCampaign() {
       try {
-        console.log(typeof(this.campaign.start_date));
+        const payload = {
+          campaign_name: this.campaign.campaign_name,
+          description: this.campaign.description,
+          budget: this.campaign.budget,
+          start_date: this.campaign.start_date,
+          end_date: this.campaign.end_date,
+          visibility: this.campaign.visibility ? true : false,
+          niche: this.campaign.niche
+        };
         const response = await fetchWithAuth("http://127.0.0.1:5000/api/campaigns/create_new_campaign", {
           method: "POST",
-          body: JSON.stringify({
-            name: this.campaign.name,
-            description: this.campaign.description,
-            budget: this.campaign.budget,
-            start_date: this.campaign.start_date,
-            end_date: this.campaign.end_date,
-            visibility: this.campaign.visibility,
-            niche: this.campaign.niche
-          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
         });
         if (response.ok) {
           this.$router.push("/sponsor/dashboard");
@@ -88,5 +109,8 @@ export default {
 <style scoped>
 .create-campaign {
   padding: 20px;
+}
+.error {
+  color: red;
 }
 </style>

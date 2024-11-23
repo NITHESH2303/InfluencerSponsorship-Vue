@@ -1,17 +1,20 @@
 <template>
   <div class="influencer-dashboard">
-    <h1>Influencer Dashboard</h1>
-    <ProfileSection :influencer="influencer" @profileUpdated="fetchProfile" />
+    <h1>Welcome, {{ influencerMeta.username }}</h1>
+    <ProfileSection :influencerMeta="influencerMeta" @profileUpdated="fetchMetaData"/>
     <CampaignList :campaigns="campaigns" />
-    <AdRequestList :adRequests="adRequests" @adUpdated="fetchAdRequests" />
+    <AdRequestList
+        :adRequests="adRequests"
+        @adUpdated="fetchAdRequests"
+    />
   </div>
 </template>
 
 <script>
-import axios from "axios";
 import ProfileSection from "@/components/influencer/ProfileSection.vue";
 import AdRequestList from "@/components/influencer/InfluencerAdRequests.vue";
 import InfluencerCampaigns from "@/components/influencer/InfluencerCampaigns.vue";
+import { fetchWithAuth } from "@/api.js";
 
 export default {
   components: {
@@ -19,56 +22,36 @@ export default {
     InfluencerCampaigns,
     AdRequestList,
   },
+  props: {
+    influencerMeta: {
+      type: Object,
+      required: true,
+    },
+  },
   data() {
     return {
-      influencer: null,
       campaigns: [],
       adRequests: [],
     };
   },
   methods: {
-    async fetchProfile() {
+    async fetchMetaData() {
       try {
-        const response = await fetch("/api/influencer/profile");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/influencer/meta", {
+          method: "GET",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          this.influencerMeta = data.data;
         }
-        const data = await response.json();
-        this.influencer = data.data; // Assuming the structure is the same
       } catch (error) {
-        console.error("Error fetching influencer profile:", error);
-      }
-    },
-    async fetchCampaigns() {
-      try {
-        const response = await fetch("/api/campaigns");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        this.campaigns = data.data; // Assuming the structure is the same
-      } catch (error) {
-        console.error("Error fetching campaigns:", error);
-      }
-    },
-    async fetchAdRequests() {
-      try {
-        const response = await fetch("/api/ad-requests");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        this.adRequests = data.data; // Assuming the structure is the same
-      } catch (error) {
-        console.error("Error fetching ad requests:", error);
+        console.error("Failed to fetch influencer meta:", error);
       }
     },
   },
-  async created() {
-    await Promise.all([this.fetchProfile(), this.fetchCampaigns(), this.fetchAdRequests()]);
-  },
-}
+};
 </script>
+
 
 <style scoped>
 .influencer-dashboard {

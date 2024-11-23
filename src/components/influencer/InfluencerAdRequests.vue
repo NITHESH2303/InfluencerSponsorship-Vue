@@ -17,7 +17,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import {fetchWithAuth} from "@/api.js";
 
 export default {
@@ -30,17 +29,14 @@ export default {
   methods: {
     async respondToAd(adId, action) {
       try {
-        const payload = { status: action === "approve" ? "APPROVED" : action.toUpperCase() };
+        const payload = {status: action === "approve" ? "APPROVED" : action.toUpperCase()};
         const response = await fetchWithAuth(`/api/ad-requests/${adId}`, {
           method: 'PATCH',
           body: JSON.stringify(payload),
         });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.ok) {
+          this.$emit("adU pdated");
         }
-
-        this.$emit("adUpdated");
       } catch (error) {
         console.error("Error responding to ad request:", error);
       }

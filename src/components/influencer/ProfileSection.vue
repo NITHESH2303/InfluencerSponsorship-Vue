@@ -1,32 +1,37 @@
 <template>
   <div class="profile-section">
     <h2>Profile</h2>
-    <div v-if="influencer">
-      <p><strong>About:</strong> {{ influencer.about }}</p>
-      <p><strong>Category:</strong> {{ influencer.category }}</p>
-      <p><strong>Followers:</strong> {{ influencer.followers }}</p>
-      <h3>Social Media Profiles</h3>
-      <ul>
-        <li v-for="profile in influencer.social_media_profiles" :key="profile.platform">
-          <strong>{{ profile.platform }}:</strong> {{ profile.username }}
-        </li>
-      </ul>
-      <button @click="showEditModal = true">Edit Profile</button>
-    </div>
+    <p><strong>About:</strong> {{ editForm.about }}</p>
+    <p><strong>Category:</strong> {{ editForm.category }}</p>
+    <p><strong>Followers:</strong> {{ influencerMeta.followers }}</p>
+    <h3>Social Media Profiles</h3>
+    <ul>
+      <li v-for="profile in editForm.social_media_profiles" :key="profile.platform">
+        <strong>{{ profile.platform }}:</strong> {{ profile.username }}
+      </li>
+    </ul>
+    <button @click="showEditModal = true">Edit Profile</button>
 
-    <!-- Edit Profile Modal -->
     <div v-if="showEditModal" class="modal">
       <div class="modal-content">
         <h3>Edit Profile</h3>
         <form @submit.prevent="updateProfile">
           <label>About:</label>
           <textarea v-model="editForm.about"></textarea>
-          <label>Category:</label>
-          <input type="text" v-model="editForm.category" />
+          <div>
+            <label for="category">Select Category:</label>
+            <select v-model="editForm.category" required>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+            </select>
+          </div>
           <label>Social Media Profiles:</label>
           <div v-for="(profile, index) in editForm.social_media_profiles" :key="index">
-            <input type="text" v-model="profile.platform" placeholder="Platform" />
-            <input type="text" v-model="profile.username" placeholder="Username" />
+            <select v-model="profile.platform" required>
+              <option value="" disabled>Select Platform</option>
+              <option v-for="platform in getAvailablePlatforms(index)" :key="platform" :value="platform">{{ platform }}</option>
+            </select>
+            <TextInput v-model="profile.username" placeholder="Username" required />
+            <button type="button" @click="removeSocialMediaProfile(index)">Remove</button>
           </div>
           <button type="button" @click="addSocialMediaProfile">Add Profile</button>
           <button type="submit">Save</button>
@@ -38,12 +43,13 @@
 </template>
 
 <script>
-import axios from "axios";
-import {fetchWithAuth} from "@/api.js";
+import { fetchWithAuth } from "@/api.js";
+import TextInput from "@/components/TextInput.vue";
 
 export default {
+  components: { TextInput },
   props: {
-    influencer: {
+    influencerMeta: {
       type: Object,
       required: true,
     },
@@ -51,45 +57,62 @@ export default {
   data() {
     return {
       showEditModal: false,
+      categories: [
+        "Education",
+        "Daily Updates",
+        "Comics",
+        "Movie & Series",
+        "Travel",
+        "Food",
+        "Fashion",
+        "Technology",
+      ],
       editForm: {
-        about: "",
-        category: "",
-        social_media_profiles: [],
+        about: this.influencerMeta.about,
+        category: this.influencerMeta.category,
+        social_media_profiles: JSON.parse(JSON.stringify(this.influencerMeta.social_media_profiles)),
       },
     };
   },
+  watch: {
+    influencerMeta: {
+      immediate: true,
+      deep: true,
+      handler(newMeta) {
+        this.editForm.about = newMeta.about;
+        this.editForm.category = newMeta.category;
+        this.editForm.social_media_profiles = JSON.parse(JSON.stringify(newMeta.social_media_profiles));
+      },
+    },
+  },
   methods: {
+    getAvailablePlatforms(index) {
+      const selectedPlatforms = this.editForm.social_media_profiles.map(profile => profile.platform);
+      const currentPlatform = this.editForm.social_media_profiles[index].platform;
+      return ["Instagram", "Twitter", "YouTube"].filter(
+          platform => !selectedPlatforms.includes(platform) || platform === currentPlatform
+      );
+    },
+    removeSocialMediaProfile(index) {
+      this.editForm.social_media_profiles.splice(index, 1);
+    },
     addSocialMediaProfile() {
       this.editForm.social_media_profiles.push({ platform: "", username: "" });
     },
     async updateProfile() {
       try {
-        const response = await fetchWithAuth("/api/influencer/profile", {
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/influencer/profile/edit", {
           method: "PATCH",
           body: JSON.stringify(this.editForm),
         });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.ok) {
+          const data = await response.json();
+          this.$emit("profileUpdated", data.data);
+          this.showEditModal = false;
         }
-
-        this.$emit("profileUpdated");
-        this.showEditModal = false;
       } catch (error) {
         console.error("Error updating profile:", error);
       }
-    },
-  },
-  watch: {
-    influencer: {
-      immediate: true,
-      handler(newInfluencer) {
-        this.editForm = {
-          about: newInfluencer.about,
-          category: newInfluencer.category,
-          social_media_profiles: [...newInfluencer.social_media_profiles],
-        };
-      },
     },
   },
 };

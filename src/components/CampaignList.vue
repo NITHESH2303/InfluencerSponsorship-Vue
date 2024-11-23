@@ -3,10 +3,10 @@
     <h2>Your Campaigns</h2>
     <ul>
       <li v-for="campaign in campaigns" :key="campaign.campaign_id">
-        <router-link :to="`/campaigns/${campaign.campaign_id}`">{{ campaign.campaign_name }}</router-link>
-        <span v-if="campaign.status === 'Pending'" class="pending-label">Pending</span>
-        <span v-else-if="campaign.status === 'active'" class="active-label">Active</span>
-        <span v-else class="completed-label">Completed</span>
+        <router-link :to="{ name: 'CampaignDetails', params: { campaignId: campaign.campaign_id } }">{{ campaign.campaign_name }}</router-link>
+        <span v-if="campaign.status === 'YetToStart'" class="pending-label">YetToStart</span>
+        <span v-else-if="campaign.status === 'Active'" class="active-label">Active</span>
+        <span v-else-if="campaign.status === 'Completed'" class="completed-label">Completed</span>
         <button @click="goToEdit(campaign)" class="edit-button">Edit</button>
         <DeleteCampaign :campaignId="campaign.campaign_id" :onDeleted="handleDelete" />
       </li>
@@ -54,8 +54,7 @@ export default {
       }
     },
     goToEdit(campaign) {
-      console.log(campaign.campaign_id);
-      this.$router.push({name: 'EditCampaign', params: {campaignId: campaign.campaign_id, campaignMeta: campaign}});
+      this.$router.push({name: 'EditCampaign', params: {campaignId: campaign.campaign_id}});
     },
     handleDelete(campaignId) {
       this.campaigns = this.campaigns.filter(campaign => campaign.campaign_id !== campaignId);
