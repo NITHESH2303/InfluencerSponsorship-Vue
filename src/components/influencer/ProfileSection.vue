@@ -1,39 +1,55 @@
 <template>
   <div class="profile-section">
     <h2>Profile</h2>
-    <p><strong>About:</strong> {{ editForm.about }}</p>
-    <p><strong>Category:</strong> {{ editForm.category }}</p>
+    <p><strong>About:</strong> {{ influencerMeta.about }}</p>
+    <p><strong>Category:</strong> {{ influencerMeta.category }}</p>
     <p><strong>Followers:</strong> {{ influencerMeta.followers }}</p>
+
     <h3>Social Media Profiles</h3>
     <ul>
-      <li v-for="profile in editForm.social_media_profiles" :key="profile.platform">
+      <li v-for="profile in influencerMeta.social_media_profiles" :key="profile.platform">
         <strong>{{ profile.platform }}:</strong> {{ profile.username }}
       </li>
     </ul>
     <button @click="showEditModal = true">Edit Profile</button>
 
+    <h3>Ad Requests</h3>
+    <ul v-if="influencerMeta.ads.length">
+      <li v-for="ad in influencerMeta.ads" :key="ad.ad_id">
+        <p><strong>Campaign:</strong> {{ ad.campaign_name }}</p>
+        <p><strong>Requirement:</strong> {{ ad.requirement }}</p>
+        <p><strong>Amount:</strong> ${{ ad.amount }}</p>
+        <p><strong>Status:</strong> {{ ad.status }}</p>
+      </li>
+    </ul>
+    <p v-else>No ads found.</p>
+
     <div v-if="showEditModal" class="modal">
       <div class="modal-content">
         <h3>Edit Profile</h3>
         <form @submit.prevent="updateProfile">
-          <label>About:</label>
-          <textarea v-model="editForm.about"></textarea>
+          <div>
+            <label>About:</label>
+            <textarea v-model="editForm.about"></textarea>
+          </div>
           <div>
             <label for="category">Select Category:</label>
             <select v-model="editForm.category" required>
               <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
             </select>
           </div>
-          <label>Social Media Profiles:</label>
-          <div v-for="(profile, index) in editForm.social_media_profiles" :key="index">
-            <select v-model="profile.platform" required>
-              <option value="" disabled>Select Platform</option>
-              <option v-for="platform in getAvailablePlatforms(index)" :key="platform" :value="platform">{{ platform }}</option>
-            </select>
-            <TextInput v-model="profile.username" placeholder="Username" required />
-            <button type="button" @click="removeSocialMediaProfile(index)">Remove</button>
+          <div>
+            <label>Social Media Profiles:</label>
+            <div v-for="(profile, index) in editForm.social_media_profiles" :key="index">
+              <select v-model="profile.platform" required>
+                <option value="" disabled>Select Platform</option>
+                <option v-for="platform in getAvailablePlatforms(index)" :key="platform" :value="platform">{{ platform }}</option>
+              </select>
+              <TextInput v-model="profile.username" placeholder="Username" required />
+              <button type="button" @click="removeSocialMediaProfile(index)">Remove</button>
+            </div>
+            <button type="button" @click="addSocialMediaProfile">Add Profile</button>
           </div>
-          <button type="button" @click="addSocialMediaProfile">Add Profile</button>
           <button type="submit">Save</button>
           <button type="button" @click="showEditModal = false">Cancel</button>
         </form>
@@ -117,3 +133,32 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.profile-section {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 500px;
+}
+</style>

@@ -3,12 +3,16 @@
     <h2>{{ isEdit ? "Edit Ad Request" : "Create Ad Request" }}</h2>
     <form @submit.prevent="submitAdRequest">
       <div>
-        <label for="request">Title:</label>
-        <input type="text" v-model="adRequest.request" required />
-      </div>
-      <div>
         <label for="requirements">Requirements:</label>
         <textarea v-model="adRequest.requirement" required></textarea>
+      </div>
+      <div>
+        <label for="influencer">Select Influencer:</label>
+        <select v-model="adRequest.influencer_id" required>
+          <option v-for="influencer in influencers" :key="influencer.influencer_id" :value="influencer.influencer_id">
+            {{ influencer.username }}
+          </option>
+        </select>
       </div>
       <div>
         <label for="amount">Payment Amount:</label>
@@ -20,6 +24,7 @@
   </div>
 </template>
 
+
 <script>
 import { fetchWithAuth } from "@/api";
 
@@ -29,19 +34,21 @@ export default {
       type: Number,
       required: true,
     },
-    adRequestId: {
+    adId: {
       type: Number,
       default: null,
     },
   },
   data() {
     return {
-      isEdit: !!this.adRequestId,
+      isEdit: !!this.adId,
       adRequest: {
         request: "",
         requirement: "",
         amount: 0,
+        influencer_id: null,
       },
+      influencers: [],
       error: "",
     };
   },
@@ -49,12 +56,14 @@ export default {
     async fetchAdRequest() {
       if (this.isEdit) {
         try {
-          const response = await fetchWithAuth(`http://127.0.0.1:5000/api/adrequests/${this.adRequestId}`, {
+          console.log(this.adId)
+          const response = await fetchWithAuth(`http://127.0.0.1:5000/api/campaign/${this.campaignId}/adrequests/${this.adId}`, {
             method: "GET",
           });
           if (response.ok) {
             const data = await response.json();
             this.adRequest = data.data;
+            console.log(this.adRequest);
           } else {
             this.error = "Failed to load ad request details.";
           }
@@ -63,10 +72,25 @@ export default {
         }
       }
     },
+    async fetchInfluencers() {
+      try {
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/influencers/list", {
+          method: "GET",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          this.influencers = data.data;
+        } else {
+          this.error = "Failed to load influencers.";
+        }
+      } catch (error) {
+        this.error = "An error occurred: " + error.message;
+      }
+    },
     async submitAdRequest() {
       const url = this.isEdit
-          ? `http://127.0.0.1:5000/api/adrequests/${this.adRequestId}`
-          : `http://127.0.0.1:5000/api/adrequests`;
+          ? `http://127.0.0.1:5000/api/adrequests/${this.adId}/edit`
+          : `http://127.0.0.1:5000/api/adrequests/${this.adRequest.influencer_id}/new`;
       const method = this.isEdit ? "PUT" : "POST";
       try {
         const response = await fetchWithAuth(url, {
@@ -87,6 +111,7 @@ export default {
     },
   },
   async created() {
+    await this.fetchInfluencers();
     if (this.isEdit) await this.fetchAdRequest();
   },
 };

@@ -1,44 +1,133 @@
 <template>
-  <div class="ad-request-list">
-    <h2>Ad Requests</h2>
-    <div v-if="adRequests.length">
-      <div v-for="ad in adRequests" :key="ad.ad_id" class="ad-request-card">
-        <h3>Campaign ID: {{ ad.campaign_id }}</h3>
-        <p><strong>Requirement:</strong> {{ ad.requirement }}</p>
-        <p><strong>Amount:</strong> {{ ad.amount }}</p>
-        <p><strong>Status:</strong> {{ ad.status }}</p>
-        <button @click="respondToAd(ad.ad_id, 'approve')">Approve</button>
-        <button @click="respondToAd(ad.ad_id, 'negotiate')">Negotiate</button>
-        <button @click="respondToAd(ad.ad_id, 'reject')">Reject</button>
-      </div>
-    </div>
-    <p v-else>No ad requests available.</p>
+  <div class="ad-requests">
+    <h3>Your Ad Requests</h3>
+    <table v-if="adRequests.length" class="table">
+      <thead>
+      <tr>
+        <th>Campaign</th>
+        <th>Sponsor</th>
+        <th>Amount</th>
+        <th>Negotiation Amount</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr v-for="ad in adRequests" :key="ad.id">
+        <td>{{ ad.campaign_name }}</td>
+        <td>{{ ad.sponsor_username }}</td>
+        <td>${{ ad.amount }}</td>
+
+        <td>${{ ad.negotiation_amount }}</td>
+
+        <td>{{ ad.status }}</td>
+        <td>
+          <button v-if="ad.status === adStatuses[0]" @click="acceptRequest(ad.ad_id)">Accept</button> <!-- Pending -->
+          <button v-if="ad.status === adStatuses[0]" @click="rejectRequest(ad.ad_id)">Reject</button> <!-- Pending -->
+          <button v-if="ad.status === adStatuses[0]" @click="negotiateRequest(ad.ad_id)">Negotiate</button> <!-- Pending -->
+          <button v-if="ad.status === adStatuses[1]" @click="negotiateRequest(ad.ad_id)">Negotiate</button> <!-- Negotiation -->
+        </td>
+      </tr>
+      </tbody>
+    </table>
+    <p v-else>No ad requests found.</p>
   </div>
 </template>
 
 <script>
-import {fetchWithAuth} from "@/api.js";
+import { fetchWithAuth } from "@/api.js";
 
 export default {
   props: {
-    adRequests: {
-      type: Array,
+    influencerId: {
+      type: Number,
       required: true,
-    },
+    }
+  },
+  data() {
+    return {
+      adRequests: [],
+      adStatuses: [],
+    };
+  },
+  computed: {
+    showNegotiationColumn() {
+      return this.adRequests.some(ad => ad.status === 'Negotiation');
+    }
+  },
+  async created() {
+    await this.fetchAdRequests();
+    await this.fetchAdStatus(); // Fetching the statuses
   },
   methods: {
-    async respondToAd(adId, action) {
+    async fetchAdStatus() {
       try {
-        const payload = {status: action === "approve" ? "APPROVED" : action.toUpperCase()};
-        const response = await fetchWithAuth(`/api/ad-requests/${adId}`, {
-          method: 'PATCH',
-          body: JSON.stringify(payload),
-        });
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/adstatus");
         if (response.ok) {
-          this.$emit("adU pdated");
+          const data = await response.json();
+          this.adStatuses = data.data; // Store fetched statuses
+        } else {
+          console.error("Failed to load ad statuses.");
         }
       } catch (error) {
-        console.error("Error responding to ad request:", error);
+        console.error("An error occurred: ", error.message);
+      }
+    },
+    async fetchAdRequests() {
+      try {
+        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/influencer/ad-requests/${this.influencerId}`, {
+          method: "GET",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          this.adRequests = data.data;
+        } else {
+          console.error("Failed to fetch ad requests.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    },
+    async acceptRequest(adId) {
+      await this.updateRequestStatus(adId, "Accepted");
+    },
+    async rejectRequest(adId) {
+      await this.updateRequestStatus(adId, "Rejected");
+    },
+    async negotiateRequest(adId) {
+      const newAmount = prompt("Enter the new amount:");
+      if (newAmount) {
+        try {
+          const response = await fetchWithAuth(`http://127.0.0.1:5000/api/influencer/negotiate/${adId}`, {
+            method: "PATCH",
+            body: JSON.stringify({negotiation_amount: newAmount}),
+          });
+          if (response.ok) {
+            alert("Negotiation request sent successfully.");
+            await this.fetchAdRequests();
+          } else {
+            console.error("Failed to negotiate.");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+    },
+    async updateRequestStatus(adId, status) {
+      try {
+        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/influencer/ad-requests/${adId}/status`, {
+          method: "PATCH",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({status}),
+        });
+        if (response.ok) {
+          alert(`Ad request ${status.toLowerCase()} successfully.`);
+          await this.fetchAdRequests();
+        } else {
+          console.error("Failed to update ad request status.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
       }
     },
   },
@@ -46,9 +135,19 @@ export default {
 </script>
 
 <style scoped>
-.ad-request-card {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 10px;
+.ad-requests {
+  margin-top: 20px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
 }
 </style>
