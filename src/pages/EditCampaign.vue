@@ -1,48 +1,163 @@
 <template>
-  <div class="edit-campaign">
-    <h1>Edit Campaign</h1>
-    <form @submit.prevent="updateCampaign">
-      <div>
-        <label for="name">Campaign Name:</label>
-        <input type="text" v-model="campaign.campaign_name" required />
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+      <div class="bg-white rounded-xl shadow-lg p-8 animate-fade-in">
+        <h1 class="text-3xl font-bold gradient-text mb-8">Edit Campaign</h1>
+
+        <form @submit.prevent="updateCampaign" class="space-y-6">
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Campaign Name
+              <span class="text-red-500">*</span>
+            </label>
+            <input
+                type="text"
+                v-model="campaign.campaign_name"
+                required
+                class="input"
+                placeholder="Enter campaign name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Description
+              <span class="text-red-500">*</span>
+            </label>
+            <textarea
+                v-model="campaign.description"
+                required
+                rows="4"
+                class="input"
+                placeholder="Describe your campaign"
+            ></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Start Date
+                <span class="text-red-500">*</span>
+              </label>
+              <input
+                  type="date"
+                  v-model="formattedStartDate"
+                  required
+                  class="input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                End Date
+                <span class="text-red-500">*</span>
+              </label>
+              <input
+                  type="date"
+                  v-model="formattedEndDate"
+                  required
+                  class="input"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Budget
+                <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-2 text-gray-500">$</span>
+                <input
+                    type="number"
+                    v-model="campaign.budget"
+                    required
+                    min="0"
+                    step="0.01"
+                    class="input pl-8"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Niche
+                <span class="text-red-500">*</span>
+              </label>
+              <select
+                  v-model="campaign.niche"
+                  required
+                  class="select"
+              >
+                <option value="" disabled>Select a niche</option>
+                <option
+                    v-for="niche in nicheOptions"
+                    :key="niche"
+                    :value="niche"
+                >
+                  {{ niche }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <input
+                type="checkbox"
+                id="visibility"
+                v-model="campaign.visibility"
+                class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <label for="visibility" class="text-sm text-gray-700">
+              Make campaign visible to influencers
+            </label>
+          </div>
+
+          <div class="flex flex-wrap gap-4 mt-8">
+            <button
+                type="submit"
+                class="btn btn-primary"
+                :disabled="isLoading"
+            >
+              <span v-if="isLoading" class="loading-dots">Updating</span>
+              <span v-else>Update Campaign</span>
+            </button>
+
+            <button
+                v-if="campaign.status !== 'Active'"
+                @click.prevent="updateStatus('Active')"
+                class="btn btn-success"
+            >
+              <i class="fas fa-play mr-2"></i>
+              Activate
+            </button>
+
+            <button
+                v-if="campaign.status !== 'Completed'"
+                @click.prevent="updateStatus('Completed')"
+                class="btn btn-info"
+            >
+              <i class="fas fa-flag-checkered mr-2"></i>
+              Mark as Completed
+            </button>
+
+            <DeleteCampaign
+                :campaignId="campaign.id"
+                :onDeleted="handleDelete"
+                class="btn btn-danger"
+            />
+          </div>
+        </form>
+
+        <div v-if="error"
+             class="mt-6 bg-red-50 border-l-4 border-red-500 p-4"
+             role="alert"
+        >
+          <p class="text-red-700">{{ error }}</p>
+        </div>
       </div>
-      <div>
-        <label for="description">Description:</label>
-        <textarea v-model="campaign.description" required></textarea>
-      </div>
-      <div>
-        <label for="start_date">Start Date:</label>
-        <input type="date" v-model="formattedStartDate" required />
-      </div>
-      <div>
-        <label for="end_date">End Date:</label>
-        <input type="date" v-model="formattedEndDate" required />
-      </div>
-      <div>
-        <label for="budget">Budget:</label>
-        <input type="number" v-model="campaign.budget" required />
-      </div>
-      <div>
-        <label for="visibility">Visibility:</label>
-        <input type="checkbox" v-model="campaign.visibility" />
-        <span>{{ campaign.visibility ? 'Public' : 'Private' }}</span>
-      </div>
-      <div>
-        <select v-model="campaign.niche" required>
-          <option v-for="niche in this.nicheOptions" :key="niche" :value="niche">{{ niche }}</option>
-        </select>
-      </div>
-      <button type="submit">Update Campaign</button>
-      <button
-          v-if="campaign.status !== 'Active'"
-          @click="updateStatus('Active')">Activate</button>
-      <button
-          v-if="campaign.status !== 'Completed'"
-          @click="updateStatus('Completed')">Mark as Completed</button>
-      <DeleteCampaign :campaignId="campaign.id" :onDeleted="handleDelete"/>
-    </form>
-    <p v-if="error" class="error">{{ error }}</p>
-    <p v-if="isLoading">Updating...</p>
+    </div>
   </div>
 </template>
 
@@ -61,17 +176,18 @@ export default {
   data() {
     return {
       campaign: {
-        name: "",
+        campaign_name: "",
         description: "",
         budget: 0,
         start_date: "",
         end_date: "",
-        visibility: "",
-        niche: ""
+        visibility: false,
+        niche: "",
+        status: "",
       },
       formattedStartDate: "",
       formattedEndDate: "",
-      nicheOptions: "",
+      nicheOptions: [],
       error: "",
       isLoading: false,
     };
@@ -96,17 +212,13 @@ export default {
       },
     },
   },
-  async created() {
-    await this.fetchNicheOptions();
-    await this.fetchCampaign();
-  },
   methods: {
     async fetchNicheOptions() {
       try {
         const response = await fetchWithAuth("http://127.0.0.1:5000/api/niches");
         if (response.ok) {
-          const niches = await response.json();
-          this.nicheOptions = niches.data;
+          const data = await response.json();
+          this.nicheOptions = data.data;
         } else {
           console.error("Failed to load niches.");
         }
@@ -116,12 +228,12 @@ export default {
     },
     async fetchCampaign() {
       try {
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/campaigns/${this.campaignId}`);
+        const response = await fetchWithAuth(
+            `http://127.0.0.1:5000/api/campaigns/${this.campaignId}`
+        );
         if (response.ok) {
           const data = await response.json();
           this.campaign = data.data;
-          this.formattedStartDate = this.campaign.start_date ? this.campaign.start_date.split(' ')[0] : '';
-          this.formattedEndDate = this.campaign.end_date ? this.campaign.end_date.split(' ')[0] : '';
         } else {
           this.error = "Failed to load campaign data.";
         }
@@ -132,13 +244,16 @@ export default {
     async updateCampaign() {
       this.isLoading = true;
       try {
-        const payload = { ...this.campaign, visibility: !!this.campaign.visibility };
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/campaigns/edit/${this.campaignId}`, {
-          method: "PATCH",
-          body: JSON.stringify(payload),
-        });
+        const response = await fetchWithAuth(
+            `http://127.0.0.1:5000/api/campaigns/edit/${this.campaignId}`,
+            {
+              method: "PATCH",
+              body: JSON.stringify(this.campaign),
+            }
+        );
         if (response.ok) {
-          this.$router.push("/sponsor-dashboard");
+          this.$toast.success("Campaign updated successfully");
+          this.$router.push("/sponsor/dashboard");
         } else {
           this.error = "Failed to update campaign.";
         }
@@ -158,30 +273,73 @@ export default {
             }
         );
         if (response.ok) {
-          const result = await response.json();
-          this.campaign.status = result.status;
-          alert("Campaign status updated successfully!");
+          this.$toast.success("Campaign status updated successfully");
+          this.campaign.status = status;
         } else {
           this.error = "Failed to update campaign status.";
-          console.error("Failed to update status.");
         }
       } catch (error) {
-        console.error("An error occurred: ", error.message);
+        this.error = "An error occurred: " + error.message;
       }
     },
-    handleDelete(campaignId) {
-      this.$router.push("/sponsor-dashboard");
+    handleDelete() {
+      this.$router.push("/sponsor/dashboard");
     },
+  },
+  async created() {
+    await Promise.all([this.fetchNicheOptions(), this.fetchCampaign()]);
   },
 };
 </script>
 
 <style scoped>
-.edit-campaign {
-  padding: 20px;
+.input {
+  @apply w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500
+  focus:border-primary-500 transition-all duration-200;
 }
 
-.error {
-  color: red;
+.select {
+  @apply w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500
+  focus:border-primary-500 transition-all duration-200;
+}
+
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center;
+}
+
+.btn-primary {
+  @apply bg-gradient-to-r from-primary-600 to-blue-600 text-white
+  hover:from-primary-700 hover:to-blue-700 disabled:opacity-50;
+}
+
+.btn-success {
+  @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+.btn-info {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.gradient-text {
+  @apply bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

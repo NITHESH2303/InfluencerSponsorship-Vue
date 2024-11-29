@@ -1,76 +1,124 @@
 <template>
-  <div class="sponsors-list">
-    <h2>Sponsors</h2>
-    <ul v-if="sponsors.length">
-      <li v-for="sponsor in sponsors" :key="sponsor.id">
-        {{ sponsor.company_name || sponsor.name }} - Industry: {{ sponsor.industry }}
-        <div>
-          <p v-if="sponsor.is_flagged"><strong>Flagged Reason:</strong> {{ sponsor.flag_reason }}</p>
-          <button v-if="isAdmin" @click="toggleFlag(sponsor)">
-            {{ sponsor.is_flagged ? "Unflag User" : "Flag User" }}
-          </button>
+  <div class="space-y-6">
+    <div v-if="sponsors.length" class="grid grid-cols-1 gap-6">
+      <ListCard
+          v-for="sponsor in sponsors"
+          :key="sponsor.id"
+          :title="sponsor.company_name || sponsor.name"
+          :subtitle="sponsor.industry"
+      >
+        <div class="mt-4 space-y-4">
+          <div class="flex items-center space-x-4">
+            <StatusBadge :status="getVerificationStatus(sponsor.verification_status)" />
+            <StatusBadge
+                v-if="sponsor.is_flagged"
+                status="Flagged"
+            />
+          </div>
+
+          <div v-if="sponsor.is_flagged" class="bg-red-50 border-l-4 border-red-500 p-4">
+            <p class="text-sm text-red-700">
+              <strong>Flag Reason:</strong> {{ sponsor.flag_reason }}
+            </p>
+          </div>
+
+          <div v-if="isAdmin" class="flex justify-end space-x-3">
+            <button
+                v-if="sponsor.is_flagged"
+                @click="unflagUser(sponsor)"
+                class="btn btn-secondary"
+            >
+              <i class="fas fa-flag mr-2"></i> Unflag
+            </button>
+            <button
+                v-else
+                @click="flagUser(sponsor)"
+                class="btn btn-danger"
+            >
+              <i class="fas fa-flag mr-2"></i> Flag
+            </button>
+          </div>
         </div>
-      </li>
-    </ul>
-    <p v-else>Loading sponsors...</p>
+      </ListCard>
+    </div>
+
+    <div v-else class="text-center py-12">
+      <div class="text-gray-400 mb-4">
+        <i class="fas fa-building text-4xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900">No sponsors found</h3>
+      <p class="text-gray-500">Check back later for new sponsors</p>
+    </div>
   </div>
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api.js";
+import { fetchWithAuth } from "@/api";
+import ListCard from './shared/ListCard.vue';
+import StatusBadge from './shared/StatusBadge.vue';
 
 export default {
+  components: { ListCard, StatusBadge },
   data() {
     return {
       sponsors: [],
-      error: "",
+      isAdmin: false,
+      error: ""
     };
   },
   methods: {
+    getVerificationStatus(status) {
+      const statuses = {
+        0: 'Pending',
+        1: 'Verification Initiated',
+        2: 'Verified'
+      };
+      return statuses[status] || 'Unknown';
+    },
     async fetchSponsors() {
       try {
         const response = await fetchWithAuth("http://127.0.0.1:5000/api/sponsors/list");
         if (response.ok) {
           const data = await response.json();
           this.sponsors = data.data;
-        } else {
-          this.error = "Failed to fetch sponsors.";
         }
       } catch (error) {
-        this.error = "An error occurred while fetching sponsors.";
+        this.error = "Failed to load sponsors";
       }
     },
-    async toggleFlag(influencer) {
-      try {
-        const action = influencer.is_flagged ? "unflag" : "flag";
-        let reason = null;
+    async flagUser(sponsor) {
+      const reason = prompt("Enter a reason for flagging this user:");
+      if (!reason) return;
 
-        if (!influencer.is_flagged) {
-          reason = prompt("Enter a reason for flagging this user:");
-          if (!reason) {
-            alert("Flagging canceled. Reason is required.");
-            return;
-          }
-        }
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/admin/operation/${action}_user`, {
+      try {
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/admin/operation/flag_user", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             user_id: sponsor.user_id,
             role: "sponsor",
-            reason: reason,
-          }),
+            reason: reason
+          })
         });
-
         if (response.ok) {
-          alert(`User ${action}ged successfully.`);
-          await this.fetchFlaggedUsers();
-          await this.fetchInfluencers();
-        } else {
-          this.error = `Failed to ${action} user.`;
+          await this.fetchSponsors();
         }
       } catch (error) {
-        this.error = `An error occurred while ${action}ging the user.`;
+        this.error = "Failed to flag user";
+      }
+    },
+    async unflagUser(sponsor) {
+      try {
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/admin/operation/unflag_user", {
+          method: "POST",
+          body: JSON.stringify({
+            user_id: sponsor.user_id
+          })
+        });
+        if (response.ok) {
+          await this.fetchSponsors();
+        }
+      } catch (error) {
+        this.error = "Failed to unflag user";
       }
     },
     checkAdminRole() {
@@ -78,14 +126,27 @@ export default {
         const roles = JSON.parse(localStorage.getItem("role"));
         this.isAdmin = roles && roles.includes("admin");
       } catch (error) {
-        console.error("Error reading roles from local storage", error);
         this.isAdmin = false;
       }
-    },
+    }
   },
-  mounted() {
-    this.fetchSponsors();
+  async created() {
     this.checkAdminRole();
-  },
+    await this.fetchSponsors();
+  }
 };
 </script>
+
+<style scoped>
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.btn-danger {
+  @apply bg-red-100 text-red-600 hover:bg-red-200;
+}
+</style>
