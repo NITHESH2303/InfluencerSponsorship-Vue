@@ -17,8 +17,8 @@
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api";
-import DeleteCampaign from "@/components/DeleteCampaign.vue";
+import { fetchWithAuth } from "@/api.js";
+import DeleteCampaign from "@/components/Campaign/DeleteCampaign.vue";
 
 export default {
   components: {DeleteCampaign},

@@ -8,8 +8,8 @@
 </template>
 
 <script>
-import CampaignStats from "@/components/CampaignStats.vue";
-import CampaignList from "@/components/CampaignList.vue";
+import CampaignStats from "@/components/Campaign/CampaignStats.vue";
+import CampaignList from "@/components/Campaign/ListSponsorCampaigns.vue";
 
 export default {
   props: {

@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api";
+import { fetchWithAuth } from "@/api.js";
 
 export default {
   props: {

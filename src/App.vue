@@ -5,6 +5,8 @@
       <nav>
         <router-link to="/signup">Sign Up</router-link>
         <router-link to="/login">Login</router-link>
+        <router-link to="/explore">Explore</router-link>
+        <router-link to="/statistics">Statistics</router-link>
         <!-- Add more links as needed -->
       </nav>
     </header>

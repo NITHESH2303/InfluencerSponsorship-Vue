@@ -9,18 +9,22 @@ import Unauthorized from "@/pages/Unauthorized.vue";
 import CreateCampaign from "@/pages/CreateCampaign.vue";
 import {checkSponsorVerified, getInfluencerMeta} from "@/router/authGuards.js";
 import EditCampaign from "@/pages/EditCampaign.vue";
-import DeleteCampaign from "@/components/DeleteCampaign.vue";
+import DeleteCampaign from "@/components/Campaign/DeleteCampaign.vue";
 import AdRequest from "@/pages/AdRequest.vue";
 import AdRequestForm from "@/pages/AdRequestForm.vue";
 import InfluencerDashboard from "@/pages/InfluencerDashboard.vue";
 import CampaignDetails from "@/components/Campaign/CampaignDetails.vue";
 import SponsorProfile from "@/pages/SponsorProfile.vue";
 import InfluencerProfile from "@/pages/InfluencerProfile.vue";
+import Explore from "@/pages/Explore.vue";
+import StatisticsDashboard from "@/pages/StatisticsDashboard.vue";
 
 const routes = [
     { path: '/signup', name: 'SignUp', component: SignUp },
     { path: '/login', name: 'Login', component: Login },
     { path: '/unauthorized', name: 'Unauthorized', component: Unauthorized },
+    { path: '/explore', name: 'Explore', component: Explore },
+    { path: "/statistics", name: "Statistics", component: StatisticsDashboard },
     { path: '/influencer/register', name: 'InfluencerRegistration', component: InfluencerRegistration },
     { path: '/sponsor/register', name: 'SponsorRegistration', component: SponsorRegistration },
     { path: '/profile/sponsor/:sponsorId', name: 'SponsorProfile', component: SponsorProfile, props: (route) => ({sponsorId: route.params.sponsorId}) },
