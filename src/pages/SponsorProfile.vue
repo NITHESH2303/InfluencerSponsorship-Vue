@@ -64,11 +64,11 @@
               <div class="mt-3">
                 <div class="flex justify-between text-sm text-gray-500 mb-1">
                   <span>Progress</span>
-                  <span>{{ campaign.progress }}%</span>
+                  <span>{{ campaign.progress_percentage }}%</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2">
                   <div class="bg-primary-600 rounded-full h-2 transition-all duration-300"
-                       :style="{ width: `${campaign.progress}%` }"></div>
+                       :style="{ width: `${campaign.progress_percentage}%` }"></div>
                 </div>
               </div>
             </div>
@@ -110,6 +110,7 @@ export default {
         1: 'Verification Pending',
         2: 'Verified'
       };
+      console.log(this.sponsor.verification_status);
       return status[this.sponsor.verification_status] || 'Unknown';
     },
     getVerificationClass() {

@@ -243,10 +243,10 @@ export default {
       }
     },
   },
-  mounted() {
-    this.fetchOverviewStats();
-    this.fetchPendingSponsors();
-    this.fetchFlaggedUsers();
+  async mounted() {
+    await this.fetchOverviewStats();
+    await this.fetchPendingSponsors();
+    await this.fetchFlaggedUsers();
   },
 };
 </script>

@@ -20,6 +20,15 @@
             </div>
           </div>
         </div>
+        <div v-if="influencer.sponsor_id" class="card bg-white/80 backdrop-blur-sm p-6 hover:shadow-lg transition-all">
+<!--          <h3 class="text-lg font-semibold mb-3 text-gray-800">Sponsor Profile</h3>-->
+          <router-link
+              :to="{ name: 'SponsorProfile', params: { sponsorId: influencer.sponsor_id } }"
+              class="text-blue-500 hover:underline"
+          >
+            Sponsor Profile
+          </router-link>
+        </div>
 
         <!-- About Section -->
         <div class="card mb-8 transform hover:scale-[1.01] transition-all">

@@ -18,13 +18,12 @@
           />
           <button
               @click="toggleFilters"
-              class="absolute inset-y-0 right-0 px-4 flex items-center"
+              class="absolute inset-y-0 right-0 px-4 flex items-center text-gray-500 hover:text-primary-600 transition-colors"
           >
-            <i class="fas fa-sliders-h text-gray-500 hover:text-primary-600 transition-colors"></i>
+            <FilterIcon />
           </button>
         </div>
 
-        <!-- Filter Options -->
         <transition
             enter-active-class="transition duration-200 ease-out"
             enter-from-class="transform -translate-y-2 opacity-0"
@@ -60,7 +59,7 @@
                 </select>
               </div>
 
-              <div v-if="searchParams.role === 'influencer'" class="form-group">
+              <div v-if="searchParams.type === 'user' && searchParams.role === 'influencer'" class="form-group">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Minimum Followers</label>
                 <input
                     type="number"
@@ -86,7 +85,7 @@
         </transition>
       </div>
 
-      <!-- Results Section -->
+
       <div class="space-y-6">
         <h2 class="text-xl font-semibold text-gray-900">
           {{ searchPerformed ? 'Search Results' : defaultListTitle }}
@@ -105,7 +104,25 @@
                     <span class="text-lg font-bold text-white">{{ item.username?.[0]?.toUpperCase() }}</span>
                   </div>
                   <div>
-                    <h3 class="text-lg font-semibold text-gray-900">{{ item.username }}</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">
+                      <router-link
+                          v-if="item.role.includes('influencer')"
+                          :to="{ name: 'InfluencerProfile', params: { influencerId: item.influencer_id } }"
+                          class="hover:underline"
+                      >
+                        {{ item.username }}
+                      </router-link>
+
+                      <router-link
+                          v-else-if="item.role.includes('sponsor')"
+                          :to="{ name: 'SponsorProfile', params: { sponsorId: item.sponsor_id } }"
+                          class="hover:underline"
+                      >
+                        {{ item.username }}
+                      </router-link>
+                      <span v-else class="text-gray-900">{{ item.username }}</span>
+                    </h3>
+
                     <p class="text-sm text-gray-500">{{ item.role.join(', ') }}</p>
                   </div>
                 </div>
@@ -155,8 +172,10 @@
 
 <script>
 import { fetchWithAuth } from "@/api.js";
+import FilterIcon from "@/components/icons/FilterIcon.vue";
 
 export default {
+  components: {FilterIcon},
   data() {
     return {
       searchParams: {
@@ -175,6 +194,7 @@ export default {
   },
   watch: {
     'searchParams.type'(newType) {
+      this.resetSearchParams(newType);
       this.fetchDefaultList(newType);
       this.handleSearch();
     },
@@ -183,6 +203,14 @@ export default {
     this.fetchDefaultList(this.searchParams.type);
   },
   methods: {
+    resetSearchParams(type) {
+      if (type === 'user') {
+        this.searchParams.role = '';
+        this.searchParams.min_followers = null;
+      } else if (type === 'campaign') {
+        this.searchParams.ads_count = null;
+      }
+    },
     toggleFilters() {
       this.showFilters = !this.showFilters;
     },
@@ -208,22 +236,21 @@ export default {
             this.defaultListTitle = 'Active Campaigns';
             break;
         }
-        const response = await fetchWithAuth(url);
+        const response = await fetchWithAuth(url, { method: 'GET' });
+
         if (response.ok) {
           const data = await response.json();
           this.defaultList = data.data || [];
+        } else {
+          console.error('Error response from server:', response.status);
         }
       } catch (error) {
         console.error('Error fetching default list:', error);
       }
     },
     async handleSearch() {
-      if (!this.searchParams.keyword.trim()) {
-        this.searchPerformed = false;
-        return;
-      }
-
       try {
+        this.searchPerformed = false;
         const params = new URLSearchParams();
         for (const [key, value] of Object.entries(this.searchParams)) {
           if (value !== null && value !== '') {
@@ -231,12 +258,18 @@ export default {
           }
         }
 
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/search?${params}`);
+        const response = await fetch(`http://127.0.0.1:5000/api/search?${params}`, {
+          method: 'GET',
+        });
+
         if (response.ok) {
           const data = await response.json();
           this.results = data.data || [];
-          this.searchPerformed = true;
+        } else {
+          console.error('Error response from server:', response.status);
         }
+
+        this.searchPerformed = true;
       } catch (error) {
         console.error('Error performing search:', error);
       }
@@ -244,6 +277,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .card {

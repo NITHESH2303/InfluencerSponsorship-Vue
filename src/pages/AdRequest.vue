@@ -4,7 +4,7 @@
       <div class="bg-white rounded-xl shadow-lg p-8 mb-8 animate-fade-in">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-3xl font-bold gradient-text">
-            Ad Requests for {{ campaignName }}
+            Ad Requests
           </h2>
           <button
               @click="createAdRequest"
@@ -15,7 +15,7 @@
           </button>
         </div>
 
-        <div v-if="!loading && adRequests.length" class="space-y-4">
+        <div v-if="!loading && adRequests?.length" class="space-y-4">
           <div v-for="ad in adRequests"
                :key="ad.ad_id"
                class="card hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
@@ -101,8 +101,10 @@
   </div>
 </template>
 
+
 <script>
 import { fetchWithAuth } from "@/api";
+import {useToast} from "vue-toastification";
 
 const API_BASE = "http://127.0.0.1:5000";
 
@@ -123,6 +125,7 @@ export default {
       adStatuses: [],
       error: "",
       loading: true,
+      toast: useToast()
     };
   },
   methods: {
@@ -154,6 +157,9 @@ export default {
         if (response.ok) {
           const data = await response.json();
           this.adRequests = data.data;
+          if (this.adRequests.length === 0) {
+            this.error = "No ad requests found.";
+          }
         } else {
           const errorData = await response.json();
           this.error = errorData.message || "Failed to load ad requests.";
@@ -182,12 +188,12 @@ export default {
     async deleteAdRequest(adRequestId) {
       if (confirm("Are you sure you want to delete this ad request?")) {
         try {
-          const response = await fetchWithAuth(`${API_BASE}/api/adrequests/${adRequestId}`, {
+          const response = await fetchWithAuth(`${API_BASE}/api/adrequests/${adRequestId}/delete`, {
             method: "DELETE"
           });
           if (response.ok) {
             this.adRequests = this.adRequests.filter((ad) => ad.ad_id !== adRequestId);
-            this.$toast.success("Ad request deleted successfully");
+            this.toast.success("Ad request deleted successfully");
           } else {
             this.error = "Failed to delete the ad request.";
           }
@@ -203,7 +209,7 @@ export default {
           body: JSON.stringify({ status }),
         });
         if (response.ok) {
-          this.$toast.success(`Ad request marked as ${status.toLowerCase()}`);
+          this.toast.success(`Ad request marked as ${status.toLowerCase()}`);
           await this.fetchAdRequests();
         } else {
           this.error = "Failed to update the ad request status.";
@@ -218,7 +224,7 @@ export default {
           method: "PATCH",
         });
         if (response.ok) {
-          this.$toast.success("Negotiation accepted successfully");
+          this.toast.success("Negotiation accepted successfully");
           await this.fetchAdRequests();
         } else {
           this.error = "Failed to accept the negotiation.";

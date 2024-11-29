@@ -23,7 +23,9 @@
             <div class="text-sm font-medium text-gray-900">{{ ad.campaign_name }}</div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm text-gray-900">{{ ad.sponsor_username }}</div>
+            <router-link :to="{ name: 'SponsorProfile', params: { sponsorId: ad.sponsor_id } }" class="text-sm text-gray-900">
+              {{ ad.sponsor_username }}
+            </router-link>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="text-sm font-medium text-gray-900">${{ ad.amount }}</div>
@@ -66,6 +68,7 @@
 
 <script>
 import { fetchWithAuth } from "@/api.js";
+import {useToast} from "vue-toastification";
 
 export default {
   props: {
@@ -78,6 +81,7 @@ export default {
     return {
       adRequests: [],
       adStatuses: [],
+      toast: useToast()
     };
   },
   methods: {
@@ -131,11 +135,11 @@ export default {
             body: JSON.stringify({negotiation_amount: newAmount}),
           });
           if (response.ok) {
-            this.$toast.success("Negotiation request sent successfully");
+            this.toast.success("Negotiation request sent successfully");
             await this.fetchAdRequests();
           }
         } catch (error) {
-          this.$toast.error("Failed to negotiate");
+          this.toast.error("Failed to negotiate");
         }
       }
     },
@@ -146,11 +150,11 @@ export default {
           body: JSON.stringify({status}),
         });
         if (response.ok) {
-          this.$toast.success(`Ad request ${status.toLowerCase()} successfully`);
+          this.toast.success(`Ad request ${status.toLowerCase()} successfully`);
           await this.fetchAdRequests();
         }
       } catch (error) {
-        this.$toast.error(`Failed to update ad request status`);
+        this.toast.error(`Failed to update ad request status`);
       }
     },
   },

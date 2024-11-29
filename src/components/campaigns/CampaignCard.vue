@@ -1,5 +1,5 @@
 <template>
-  <div class="campaign-card bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
+  <div @click="goToCampaignDetails" class="campaign-card bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
     <div class="flex justify-between items-start mb-4">
       <div>
         <h3 class="text-xl font-bold text-gray-900">{{ campaign.campaign_name }}</h3>
@@ -78,7 +78,13 @@ export default {
     },
     canDelete(status) {
       return status !== 'Active' && status !== 'Completed';
-    }
+    },
+    goToCampaignDetails() {
+      this.$router.push({
+        name: 'CampaignDetails',
+        params: {campaignId: this.campaign.campaign_id}
+      });
+    },
   }
 };
 </script>

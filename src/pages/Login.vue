@@ -122,7 +122,7 @@ export default {
             } else if (roles.includes('admin')) {
               this.$router.push('/admin/overview');
             } else {
-              this.$router.push('/home');
+              this.$router.push('/explore');
             }
           } else if (response.status === 400) {
             const errorData = await response.json();

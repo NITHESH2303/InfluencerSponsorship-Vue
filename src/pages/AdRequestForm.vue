@@ -97,6 +97,7 @@
 
 <script>
 import { fetchWithAuth } from "@/api";
+import {useToast} from "vue-toastification";
 
 export default {
   props: {
@@ -120,6 +121,7 @@ export default {
       influencers: [],
       error: "",
       isSubmitting: false,
+      toast: useToast()
     };
   },
   methods: {
@@ -171,7 +173,7 @@ export default {
         });
 
         if (response.ok) {
-          this.$toast.success(
+          this.toast.success(
               `Ad request ${this.isEdit ? "updated" : "created"} successfully`
           );
           this.$router.push(`/campaigns/${this.campaignId}`);

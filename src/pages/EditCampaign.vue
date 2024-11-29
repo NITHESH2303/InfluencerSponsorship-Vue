@@ -164,6 +164,7 @@
 <script>
 import { fetchWithAuth } from "@/api";
 import DeleteCampaign from "@/components/Campaign/DeleteCampaign.vue";
+import {useToast} from "vue-toastification";
 
 export default {
   components: { DeleteCampaign },
@@ -242,6 +243,7 @@ export default {
       }
     },
     async updateCampaign() {
+      const toast = useToast();
       this.isLoading = true;
       try {
         const response = await fetchWithAuth(
@@ -252,7 +254,7 @@ export default {
             }
         );
         if (response.ok) {
-          this.$toast.success("Campaign updated successfully");
+          toast.success("Campaign updated successfully");
           this.$router.push("/sponsor/dashboard");
         } else {
           this.error = "Failed to update campaign.";
@@ -265,6 +267,7 @@ export default {
     },
     async updateStatus(status) {
       try {
+        const toast = useToast();
         const response = await fetchWithAuth(
             `http://127.0.0.1:5000/api/sponsor/campaigns/${this.campaignId}/status`,
             {
@@ -273,7 +276,7 @@ export default {
             }
         );
         if (response.ok) {
-          this.$toast.success("Campaign status updated successfully");
+          toast.success("Campaign status updated successfully");
           this.campaign.status = status;
         } else {
           this.error = "Failed to update campaign status.";

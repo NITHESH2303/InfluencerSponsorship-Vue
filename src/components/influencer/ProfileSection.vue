@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="profile-section">
     <div class="flex justify-between items-center mb-6">
@@ -279,4 +278,3 @@ export default {
   @apply bg-gray-200 text-gray-700 hover:bg-gray-300;
 }
 </style>
-```
