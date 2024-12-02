@@ -1,7 +1,6 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
-      <!-- Search Header -->
       <div class="card mb-8 animate-fade-in">
         <h1 class="text-3xl font-bold gradient-text mb-6">Explore Platform</h1>
 
@@ -130,7 +129,15 @@
               </div>
 
               <div v-else class="space-y-4">
-                <h3 class="text-lg font-semibold text-gray-900">{{ item.campaign_name }}</h3>
+                <h3 class="text-lg font-semibold text-gray-900">
+                  <router-link
+                      v-if="item && item.campaign_id"
+                      :to="{name: 'QuickStats', params: {campaignId: item.campaign_id}}"
+                      class="hover:underline">
+                    {{ item.campaign_name }}
+                  </router-link>
+
+                </h3>
                 <p class="text-gray-600 line-clamp-2">{{ item.description }}</p>
                 <div class="flex justify-between items-center">
                   <span class="text-primary-600 font-medium">${{ item.budget }}</span>
@@ -199,8 +206,8 @@ export default {
       this.handleSearch();
     },
   },
-  mounted() {
-    this.fetchDefaultList(this.searchParams.type);
+  async mounted() {
+    await this.fetchDefaultList(this.searchParams.type);
   },
   methods: {
     resetSearchParams(type) {
@@ -267,11 +274,13 @@ export default {
           this.results = data.data || [];
         } else {
           console.error('Error response from server:', response.status);
+          alert('Failed to fetch search results. Please try again later.');
         }
 
         this.searchPerformed = true;
       } catch (error) {
         console.error('Error performing search:', error);
+        alert('An unexpected error occurred. Please try again later.');
       }
     }
   },

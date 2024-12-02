@@ -7,22 +7,29 @@
     />
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-<!--      <QuickStats-->
-<!--          :activeCampaigns="campaignStats.active"-->
-<!--          :totalBudget="campaignStats.totalBudget"-->
-<!--          :adRequests="campaignStats.totalRequests"-->
-<!--      />-->
+      <CampaignStats :stats="campaignStats" />
 
       <div class="mt-8">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-2xl font-bold gradient-text">Your Campaigns</h2>
-          <button
-              @click="createNewCampaign"
-              class="btn btn-primary flex items-center space-x-2"
-          >
-            <span>Create Campaign</span>
-            <i class="fas fa-plus"></i>
-          </button>
+          <div class="flex items-center space-x-4">
+            <button
+                @click="createNewCampaign"
+                class="btn btn-primary flex items-center space-x-2"
+            >
+              <span>Create Campaign</span>
+              <i class="fas fa-plus"></i>
+            </button>
+
+            <!-- Export CSV Button -->
+            <button
+                @click="exportCampaigns"
+                class="btn btn-secondary flex items-center space-x-2"
+            >
+              <span>Export to CSV</span>
+              <i class="fas fa-file-csv"></i>
+            </button>
+          </div>
         </div>
 
         <CampaignList :sponsorId="sponsorMeta.sponsorid" />
@@ -33,14 +40,14 @@
 
 <script>
 import SponsorHeader from '@/components/sponsor/SponsorHeader.vue';
-import QuickStats from '@/components/sponsor/QuickStats.vue';
 import CampaignList from '@/components/campaigns/CampaignList.vue';
 import { fetchWithAuth } from "@/api";
+import CampaignStats from "@/components/Campaign/CampaignStats.vue";
 
 export default {
   components: {
+    CampaignStats,
     SponsorHeader,
-    QuickStats,
     CampaignList
   },
   props: {
@@ -51,11 +58,7 @@ export default {
   },
   data() {
     return {
-      campaignStats: {
-        active: 0,
-        totalBudget: 0,
-        totalRequests: 0
-      },
+      campaignStats: null,
       error: ""
     };
   },
@@ -75,6 +78,37 @@ export default {
       } catch (error) {
         this.error = "Failed to load campaign statistics";
       }
+    },
+
+    // Export Campaigns to CSV
+    async exportCampaigns() {
+      try {
+        const response = await fetchWithAuth(
+            `http://127.0.0.1:5000/api/export_campaigns/${this.sponsorMeta.sponsorid}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to export campaigns');
+        }
+
+        const blob = await response.blob();
+
+        const link = document.createElement('a');
+        const url = window.URL.createObjectURL(blob);
+        link.href = url;
+        link.download = 'campaigns.csv';
+        link.click();
+
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Error exporting campaigns:', error);
+      }
     }
   },
   async created() {
@@ -91,6 +125,11 @@ export default {
 .btn-primary {
   @apply bg-gradient-to-r from-primary-600 to-blue-600 text-white
   hover:from-primary-700 hover:to-blue-700;
+}
+
+.btn-secondary {
+  @apply bg-gradient-to-r from-green-500 to-green-700 text-white
+  hover:from-green-600 hover:to-green-800;
 }
 
 .gradient-text {

@@ -124,6 +124,15 @@
           <SponsorList />
         </section>
       </div>
+
+      <section class="mt-8 text-center">
+        <button
+            @click="triggerDailyReminders"
+            class="btn btn-primary p-2 text-xs mx-auto"
+        >
+          Trigger Daily Reminders
+        </button>
+      </section>
     </div>
   </div>
 </template>
@@ -146,6 +155,7 @@ export default {
         verified: 2,
       },
       overviewStats: null,
+      triggerStatus: null,
       pendingSponsors: [],
       flaggedUsers: [],
       error: "",
@@ -240,6 +250,22 @@ export default {
         }
       } catch (error) {
         this.error = "An error occurred while unflagging the user.";
+      }
+    },
+    async triggerDailyReminders() {
+      try {
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/trigger/daily_remainders", {
+          method: "POST",
+        });
+
+        if (response.ok) {
+          this.triggerStatus = "Daily reminders have been triggered successfully!";
+        } else {
+          const errorData = await response.json();
+          this.triggerStatus = `Error: ${errorData.data.message || "Failed to trigger daily reminders."}`;
+        }
+      } catch (error) {
+        this.triggerStatus = "An error occurred while triggering the job.";
       }
     },
   },

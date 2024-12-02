@@ -12,6 +12,14 @@
           <div class="hidden sm:flex sm:items-center sm:space-x-8 font-poppins">
             <router-link to="/explore" class="nav-link">Explore</router-link>
 
+            <div v-if="roles.length > 0" class="flex items-center space-x-4">
+              <router-link v-if="hasRole('influencer')" to="/influencer/dashboard" class="nav-link">Influencer Dashboard</router-link>
+              <router-link v-if="hasRole('sponsor')" to="/sponsor/dashboard" class="nav-link">Sponsor Dashboard</router-link>
+              <router-link v-if="hasRole('admin')" to="/admin/overview" class="nav-link">Admin Dashboard</router-link>
+            </div>
+
+            <router-link to="/settings" class="nav-link">Settings</router-link>
+
             <div v-if="!hasBothRoles" class="relative">
               <button @click="toggleRegisterMenu" class="nav-link">Register</button>
               <div v-if="showRegisterMenu" class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg">
@@ -24,7 +32,6 @@
               </div>
             </div>
 
-            <router-link to="/signup" class="nav-link">Sign Up</router-link>
             <router-link to="/login" class="nav-link">Login</router-link>
           </div>
 
