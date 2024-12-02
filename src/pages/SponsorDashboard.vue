@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+
+    <RestrictionBanner
+        v-if="sponsorMeta.is_flagged"
+        :reason="sponsorMeta.flag_reason"
+    />
+
     <SponsorHeader
         :companyName="sponsorMeta.company_name"
         :industry="sponsorMeta.industry_type"
@@ -43,9 +49,11 @@ import SponsorHeader from '@/components/sponsor/SponsorHeader.vue';
 import CampaignList from '@/components/campaigns/CampaignList.vue';
 import { fetchWithAuth } from "@/api";
 import CampaignStats from "@/components/Campaign/CampaignStats.vue";
+import RestrictionBanner from "@/components/RestrictionBanner.vue";
 
 export default {
   components: {
+    RestrictionBanner,
     CampaignStats,
     SponsorHeader,
     CampaignList

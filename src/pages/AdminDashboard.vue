@@ -1,13 +1,24 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
-      <!-- Header -->
+
       <div class="card mb-8 transform hover:scale-[1.01] transition-all">
-        <h1 class="text-3xl font-bold gradient-text mb-4">Admin Dashboard</h1>
-        <p class="text-gray-600">Monitor and manage platform activities</p>
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-3xl font-bold gradient-text mb-4">Admin Dashboard</h1>
+            <p class="text-gray-600">Monitor and manage platform activities</p>
+          </div>
+          <router-link
+              to="/statistics"
+              class="btn btn-primary flex items-center space-x-2"
+          >
+            <i class="fas fa-chart-line"></i>
+            <span>View Statistics</span>
+          </router-link>
+        </div>
       </div>
 
-      <!-- Overview Stats -->
+
       <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="card bg-white/80 backdrop-blur-sm p-6 transform hover:scale-[1.02] transition-all">
           <h3 class="text-lg font-semibold mb-2">Total Users</h3>

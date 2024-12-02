@@ -1,6 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
+
+      <RestrictionBanner
+          v-if="influencerMeta.is_flagged"
+          :reason="influencerMeta.flag_reason"
+      />
       <!-- Welcome Section -->
       <div class="card mb-8 transform hover:scale-[1.01] transition-all">
         <h1 class="text-3xl font-bold gradient-text mb-4">
@@ -56,9 +61,11 @@
 <script>
 import ProfileSection from "@/components/influencer/ProfileSection.vue";
 import InfluencerAdRequests from "@/components/influencer/InfluencerAdRequests.vue";
+import RestrictionBanner from "@/components/RestrictionBanner.vue";
 
 export default {
   components: {
+    RestrictionBanner,
     InfluencerAdRequests,
     ProfileSection,
   },
