@@ -258,7 +258,7 @@ export default {
         }
       } catch (error) {
         console.error("Error:", error);
-        this.$toast.error("An error occurred while fetching profile.");
+        this.toast.error("An error occurred while fetching profile.");
       }
     },
     editUserDetails() {

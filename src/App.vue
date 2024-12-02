@@ -1,10 +1,8 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
-
     <header class="glass fixed w-full z-50 shadow-sm">
       <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
-
           <div class="flex items-center">
             <router-link to="/" class="flex items-center space-x-2">
               <span class="text-2xl font-bold gradient-text">Influencer Sponsorship Platform</span>
@@ -32,11 +30,22 @@
               <i class="fas fa-cog mr-1"></i> Settings
             </router-link>
 
+            <div v-if="!hasBothRoles" class="relative">
+              <button @click="toggleRegisterMenu" class="nav-link">Register</button>
+              <div v-if="showRegisterMenu" class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg">
+                <router-link v-if="!hasRole('influencer')" to="/influencer/register" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" @click.native="hideRegisterMenu">
+                  Register as Influencer
+                </router-link>
+                <router-link v-if="!hasRole('sponsor')" to="/sponsor/register" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" @click.native="hideRegisterMenu">
+                  Register as Sponsor
+                </router-link>
+              </div>
+            </div>
+
             <button @click="logout" class="nav-link flex items-center">
               <i class="fas fa-sign-out-alt mr-1"></i> Logout
             </button>
           </div>
-
 
           <div class="flex items-center sm:hidden">
             <button @click="isMobileMenuOpen = !isMobileMenuOpen"
@@ -51,7 +60,6 @@
             </button>
           </div>
         </div>
-
 
         <transition
             enter-active-class="transition duration-200 ease-out"
@@ -82,6 +90,14 @@
               <i class="fas fa-cog mr-2"></i> Settings
             </router-link>
 
+            <div v-if="!hasBothRoles">
+              <button @click.prevent.stop="toggleRegisterMenuMobile" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Register</button>
+              <div v-if="showRegisterMenuMobile">
+                <router-link v-if="!hasRole('influencer')" to="/influencer/register" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" @click.native="hideRegisterMenuMobile">Register as Influencer</router-link>
+                <router-link v-if="!hasRole('sponsor')" to="/sponsor/register" class="block px-4 py-2 text-gray-700 hover:bg-gray-100" @click.native="hideRegisterMenuMobile">Register as Sponsor</router-link>
+              </div>
+            </div>
+
             <button @click="logout" class="mobile-nav-link w-full text-left">
               <i class="fas fa-sign-out-alt mr-2"></i> Logout
             </button>
@@ -90,8 +106,7 @@
       </nav>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow pt-16">
+    <main class="pt-16 min-h-screen">
       <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <router-view v-slot="{ Component }">
           <transition name="fade-scale" mode="out-in">
@@ -101,37 +116,25 @@
       </div>
     </main>
 
-    <!-- Footer -->
     <footer class="glass mt-auto">
       <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <p class="text-gray-600">&copy; {{ new Date().getFullYear() }} Mad the MAD2</p>
-          <div class="flex space-x-6">
-            <a href="#" class="text-gray-600 hover:text-primary-600 transition-colors">
-              <i class="fab fa-twitter"></i>
-            </a>
-            <a href="#" class="text-gray-600 hover:text-primary-600 transition-colors">
-              <i class="fab fa-github"></i>
-            </a>
-            <a href="#" class="text-gray-600 hover:text-primary-600 transition-colors">
-              <i class="fab fa-linkedin"></i>
-            </a>
-          </div>
-        </div>
+        <p class="text-center text-gray-600">&copy; {{ new Date().getFullYear() }} Mad the MAD2</p>
       </div>
     </footer>
   </div>
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api.js";
-import { useToast } from "vue-toastification";
+import {useToast} from "vue-toastification";
+import {fetchWithAuth} from "@/api.js";
 
 export default {
   name: 'App',
   data() {
     return {
       isMobileMenuOpen: false,
+      showRegisterMenu: false,
+      showRegisterMenuMobile: false,
       toast: useToast()
     };
   },
@@ -139,17 +142,34 @@ export default {
     roles() {
       try {
         const role = localStorage.getItem('role');
+        console.log(role);
         return role !== "undefined" && role !== null ? JSON.parse(role) : [];
       } catch (error) {
         console.error('Error parsing JSON:', error);
         return [];
       }
+
+    },
+    hasBothRoles() {
+      return this.roles.includes('influencer') && this.roles.includes('sponsor');
     },
     hasRole() {
       return (role) => this.roles.includes(role);
     },
   },
   methods: {
+    toggleRegisterMenu() {
+      this.showRegisterMenu = !this.showRegisterMenu;
+    },
+    hideRegisterMenu() {
+      this.showRegisterMenu = false;
+    },
+    toggleRegisterMenuMobile() {
+      this.showRegisterMenuMobile = !this.showRegisterMenuMobile;
+    },
+    hideRegisterMenuMobile() {
+      this.showRegisterMenuMobile = false;
+    },
     async logout() {
       try {
         const response = await fetchWithAuth("http://127.0.0.1:5000/api/auth/logout", {
@@ -170,6 +190,11 @@ export default {
       }
     },
   },
+  beforeRouteLeave(to, from, next) {
+    this.hideRegisterMenu();
+    this.hideRegisterMenuMobile();
+    next();
+  },
   watch: {
     $route() {
       this.isMobileMenuOpen = false;
@@ -182,7 +207,6 @@ export default {
 .nav-link {
   @apply text-gray-600 hover:text-primary-600 transition-colors font-medium text-lg flex items-center;
 }
-
 .mobile-nav-link {
   @apply block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors flex items-center;
 }
