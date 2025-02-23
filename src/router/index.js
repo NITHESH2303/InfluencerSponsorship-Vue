@@ -7,7 +7,7 @@ import SponsorRegistration from "@/pages/SponsorRegistration.vue";
 import SponsorDashboard from "@/pages/SponsorDashboard.vue";
 import Unauthorized from "@/pages/Unauthorized.vue";
 import CreateCampaign from "@/pages/CreateCampaign.vue";
-import {checkSponsorVerified, getInfluencerMeta} from "@/router/authGuards.js";
+import {checkSponsorVerified, getInfluencerMeta, getUserMeta} from "@/router/authGuards.js";
 import EditCampaign from "@/pages/EditCampaign.vue";
 import DeleteCampaign from "@/components/Campaign/DeleteCampaign.vue";
 import AdRequest from "@/pages/AdRequest.vue";
@@ -18,8 +18,11 @@ import SponsorProfile from "@/pages/SponsorProfile.vue";
 import InfluencerProfile from "@/pages/InfluencerProfile.vue";
 import Explore from "@/pages/Explore.vue";
 import StatisticsDashboard from "@/pages/StatisticsDashboard.vue";
+import QuickStats from "@/components/sponsor/QuickStats.vue";
+import Settings from "@/pages/Settings.vue";
 
 const routes = [
+    { path: '/', redirect: '/login' },
     { path: '/signup', name: 'SignUp', component: SignUp },
     { path: '/login', name: 'Login', component: Login },
     { path: '/unauthorized', name: 'Unauthorized', component: Unauthorized },
@@ -36,9 +39,12 @@ const routes = [
     { path: '/campaigns/:campaignId', name: 'CampaignDetails', component: CampaignDetails, props:(route) => ({ campaignId: route.params.campaignId })},
     { path: '/campaigns/:campaignId/edit', name: 'EditCampaign', component: EditCampaign, meta: { requiresAuth: true, role: 'sponsor' }, props: (route) => ({campaignId: route.params.campaignId })},
     { path: '/campaigns/:campaignId/delete', name: 'DeleteCampaign', component: DeleteCampaign, meta: {requiresAuth: true, role: 'sponsor'},props: (route) => ({campaignId: route.params.campaignId, campaignMeta: route.params.campaignMeta })},
+    { path: '/campaigns/:campaignId/stats', name: 'QuickStats', component: QuickStats, props: (route) => ({ campaignId: Number(route.params.campaignId) }),},
     { path: '/campaigns/:campaignId/ads', name: 'AdRequests', component: AdRequest, props: (route) => ({campaignId: route.params.campaignId, campaignName: String(route.params.campaignName) })},
     { path: '/campaigns/:campaignId/ads/new', name: 'CreateAdRequest', component: AdRequestForm, props: (route) => ({campaignId: route.params.campaignId })},
     { path: '/campaigns/:campaignId/ads/:adId/edit', name: 'EditAdRequest', component: AdRequestForm, props: (route) => ({ adId: route.params.adId, campaignId: route.params.campaignId }) },
+    { path: '/settings', name: 'Settings', component: Settings, meta: { requiresAuth: true }, beforeEnter: getUserMeta, props: (route) => ({userMeta: route.params.userMeta })},
+    { path: '/:pathMatch(.*)*', component: Unauthorized }
 ];
 
 const router = createRouter({

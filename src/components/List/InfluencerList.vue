@@ -1,96 +1,141 @@
 <template>
-  <div class="influencers-list">
-    <h2>Influencers</h2>
-    <ul v-if="influencers.length">
-      <li v-for="influencer in influencers" :key="influencer.influencer_id">
-        <h3>{{ influencer.username }} - {{ influencer.category }}</h3>
-        <p>Followers: {{ influencer.followers }}</p>
-        <p>About: {{ influencer.about }}</p>
-        <div>
-          <h4>Social Media Profiles:</h4>
-          <ul>
-            <li v-for="profile in influencer.social_media_profiles" :key="profile.platform">
-              {{ profile.platform }}: {{ profile.username }} (Followers: {{ profile.followers }})
-            </li>
-          </ul>
+  <div class="space-y-6">
+    <div v-if="influencers.length" class="grid grid-cols-1 gap-6">
+      <ListCard
+          v-for="influencer in influencers"
+          :key="influencer.influencer_id"
+          :title="influencer.username"
+          :subtitle="influencer.category"
+      >
+        <div class="mt-4 space-y-4">
+          <p class="text-gray-600">{{ influencer.about }}</p>
+
+          <div class="flex items-center space-x-4">
+            <span class="flex items-center text-gray-600">
+              <i class="fas fa-users mr-2"></i>
+              {{ formatNumber(influencer.followers) }} followers
+            </span>
+            <StatusBadge
+                v-if="influencer.is_flagged"
+                status="Flagged"
+            />
+          </div>
+
+          <div v-if="influencer.social_media_profiles.length" class="space-y-2">
+            <h4 class="text-sm font-medium text-gray-700">Social Media Profiles</h4>
+            <div class="flex flex-wrap gap-2">
+              <a
+                  v-for="profile in influencer.social_media_profiles"
+                  :key="profile.platform"
+                  href="#"
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-700 hover:bg-gray-200"
+              >
+                <i :class="getSocialIcon(profile.platform)" class="mr-2"></i>
+                {{ profile.username }}
+              </a>
+            </div>
+          </div>
+
+          <div v-if="isAdmin" class="flex justify-end space-x-3">
+            <button
+                v-if="influencer.is_flagged"
+                @click="unflagUser(influencer)"
+                class="btn btn-secondary"
+            >
+              <i class="fas fa-flag mr-2"></i> Unflag
+            </button>
+            <button
+                v-else
+                @click="flagUser(influencer)"
+                class="btn btn-danger"
+            >
+              <i class="fas fa-flag mr-2"></i> Flag
+            </button>
+          </div>
         </div>
-        <div v-if="influencer.ads.length">
-          <h4>Ads:</h4>
-          <ul>
-            <li v-for="ad in influencer.ads" :key="ad.ad_id">
-              {{ ad.campaign_name }} - {{ ad.requirement }} - Status: {{ ad.status }} - Amount: ${{ ad.amount }}
-            </li>
-          </ul>
-        </div>
-        <div>
-          <p v-if="influencer.is_flagged"><strong>Flagged Reason:</strong> {{ influencer.flag_reason }}</p>
-          <button v-if="isAdmin" @click="toggleFlag(influencer)">
-            {{ influencer.is_flagged ? "Unflag User" : "Flag User" }}
-          </button>
-        </div>
-      </li>
-    </ul>
-    <p v-else>Loading influencers...</p>
+      </ListCard>
+    </div>
+
+    <div v-else class="text-center py-12">
+      <div class="text-gray-400 mb-4">
+        <i class="fas fa-users text-4xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900">No influencers found</h3>
+      <p class="text-gray-500">Check back later for new influencers</p>
+    </div>
   </div>
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api.js";
+import { fetchWithAuth } from "@/api";
+import ListCard from './shared/ListCard.vue';
+import StatusBadge from './shared/StatusBadge.vue';
 
 export default {
+  components: { ListCard, StatusBadge },
   data() {
     return {
       influencers: [],
       isAdmin: false,
-      error: "",
+      error: ""
     };
   },
   methods: {
+    formatNumber(num) {
+      return new Intl.NumberFormat().format(num);
+    },
+    getSocialIcon(platform) {
+      const icons = {
+        'Instagram': 'fab fa-instagram',
+        'Twitter': 'fab fa-twitter',
+        'YouTube': 'fab fa-youtube'
+      };
+      return icons[platform] || 'fas fa-link';
+    },
     async fetchInfluencers() {
       try {
         const response = await fetchWithAuth("http://127.0.0.1:5000/api/influencers/list");
         if (response.ok) {
           const data = await response.json();
           this.influencers = data.data;
-        } else {
-          this.error = "Failed to fetch influencers.";
         }
       } catch (error) {
-        this.error = "An error occurred while fetching influencers.";
+        this.error = "Failed to load influencers";
       }
     },
-    async toggleFlag(influencer) {
+    async flagUser(influencer) {
+      const reason = prompt("Enter a reason for flagging this user:");
+      if (!reason) return;
+
       try {
-        const action = influencer.is_flagged ? "unflag" : "flag";
-        let reason = null;
-
-        if (!influencer.is_flagged) {
-          reason = prompt("Enter a reason for flagging this user:");
-          if (!reason) {
-            alert("Flagging canceled. Reason is required.");
-            return;
-          }
-        }
-
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/admin/operation/${action}_user`, {
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/admin/operation/flag_user", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             user_id: influencer.user_id,
             role: "influencer",
-            reason: reason,
-          }),
+            reason: reason
+          })
         });
-
         if (response.ok) {
-          alert(`User ${action}ged successfully.`);
-          await this.fetchFlaggedUsers();
           await this.fetchInfluencers();
-        } else {
-          this.error = `Failed to ${action} user.`;
         }
       } catch (error) {
-        this.error = `An error occurred while ${action}ging the user.`;
+        this.error = "Failed to flag user";
+      }
+    },
+    async unflagUser(influencer) {
+      try {
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/admin/operation/unflag_user", {
+          method: "POST",
+          body: JSON.stringify({
+            user_id: influencer.user_id
+          })
+        });
+        if (response.ok) {
+          await this.fetchInfluencers();
+        }
+      } catch (error) {
+        this.error = "Failed to unflag user";
       }
     },
     checkAdminRole() {
@@ -98,37 +143,27 @@ export default {
         const roles = JSON.parse(localStorage.getItem("role"));
         this.isAdmin = roles && roles.includes("admin");
       } catch (error) {
-        console.error("Error reading roles from local storage", error);
         this.isAdmin = false;
       }
-    },
+    }
   },
-  mounted() {
-    this.fetchInfluencers();
+  async created() {
     this.checkAdminRole();
-  },
+    await this.fetchInfluencers();
+  }
 };
 </script>
 
 <style scoped>
-.influencers-list {
-  margin: 20px;
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
 }
 
-.influencers-list h3 {
-  margin-bottom: 5px;
-  font-size: 1.2em;
+.btn-secondary {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
 }
 
-.influencers-list p {
-  margin: 0;
-}
-
-.influencers-list ul {
-  padding-left: 20px;
-}
-
-.influencers-list li {
-  margin-bottom: 10px;
+.btn-danger {
+  @apply bg-red-100 text-red-600 hover:bg-red-200;
 }
 </style>

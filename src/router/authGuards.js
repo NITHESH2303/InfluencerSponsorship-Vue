@@ -42,7 +42,30 @@ export async function getInfluencerMeta(to, from, next) {
         } else {
             next({
                 name: "Unauthorized",
-                params: {message: "Failed to fetch sponsor meta details."},
+                params: {message: "Failed to fetch influencer meta details."},
+            });
+        }
+    } catch (error) {
+        next({
+            name: "Unauthorized",
+            params: { message: "An error occurred: " + error.message },
+        });
+    }
+}
+
+export async function getUserMeta(to, from, next) {
+    try {
+        const response = await fetchWithAuth("http://127.0.0.1:5000/api/users/meta", {
+            method: 'GET',
+        });
+        if (response.ok) {
+            const userMeta = await response.json();
+            to.params.userMeta = userMeta.data;
+            next();
+        } else {
+            next({
+                name: "Unauthorized",
+                params: {message: "Failed to fetch user meta details."},
             });
         }
     } catch (error) {
