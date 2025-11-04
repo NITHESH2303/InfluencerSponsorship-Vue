@@ -67,8 +67,8 @@
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api.js";
-import {useToast} from "vue-toastification";
+import { fetchWithAuth, API_BASE_URL } from "@/api";
+import { useToast } from "vue-toastification";
 
 export default {
   props: {
@@ -100,7 +100,7 @@ export default {
     },
     async fetchAdStatus() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/adstatus");
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/adstatus`);
         if (response.ok) {
           const data = await response.json();
           this.adStatuses = data.data;
@@ -111,7 +111,7 @@ export default {
     },
     async fetchAdRequests() {
       try {
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/influencer/ad-requests/${this.influencerId}`);
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/influencer/ad-requests/${this.influencerId}`);
         if (response.ok) {
           const data = await response.json();
           this.adRequests = data.data;
@@ -130,7 +130,7 @@ export default {
       const newAmount = prompt("Enter the new amount:");
       if (newAmount && !isNaN(newAmount)) {
         try {
-          const response = await fetchWithAuth(`http://127.0.0.1:5000/api/influencer/negotiate/${adId}`, {
+          const response = await fetchWithAuth(`${API_BASE_URL}/api/influencer/negotiate/${adId}`, {
             method: "PATCH",
             body: JSON.stringify({negotiation_amount: newAmount}),
           });
@@ -145,7 +145,7 @@ export default {
     },
     async updateRequestStatus(adId, status) {
       try {
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/influencer/ad-requests/${adId}/status`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/influencer/ad-requests/${adId}/status`, {
           method: "PATCH",
           body: JSON.stringify({status}),
         });

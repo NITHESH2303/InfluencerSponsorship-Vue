@@ -62,7 +62,7 @@
 <script>
 import FormInput from '@/components/forms/FormInput.vue';
 import FormTextarea from '@/components/forms/FormTextarea.vue';
-import { fetchWithAuth } from "@/api";
+import { fetchWithAuth, API_BASE_URL } from "@/api";
 
 export default {
   components: {
@@ -100,7 +100,7 @@ export default {
       this.error = '';
 
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/register/sponsor", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/register/sponsor`, {
           method: "POST",
           body: JSON.stringify({
             company_name: this.company_name,

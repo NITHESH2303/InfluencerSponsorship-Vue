@@ -151,7 +151,7 @@
 <script>
 import InfluencerList from "@/components/List/InfluencerList.vue";
 import SponsorList from "@/components/List/SponsorList.vue";
-import { fetchWithAuth } from "@/api.js";
+import { fetchWithAuth, API_BASE_URL } from "@/api.js";
 
 export default {
   components: {
@@ -191,7 +191,7 @@ export default {
     },
     async fetchOverviewStats() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/admin/overview");
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/overview`);
         if (response.ok) {
           const data = await response.json();
           this.overviewStats = data.data;
@@ -204,7 +204,7 @@ export default {
     },
     async fetchPendingSponsors() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/admin/operation/sponsor_approval");
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/operation/sponsor_approval`);
         if (response.ok) {
           const data = await response.json();
           this.pendingSponsors = data.data;
@@ -217,7 +217,7 @@ export default {
     },
     async approveSponsor(sponsorId) {
       try {
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/admin/operation/approve_sponsor/${sponsorId}`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/operation/approve_sponsor/${sponsorId}`, {
           method: "POST",
         });
 
@@ -234,7 +234,7 @@ export default {
     },
     async fetchFlaggedUsers() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/admin/operation/flagged_users");
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/operation/flagged_users`);
         if (response.ok) {
           const data = await response.json();
           this.flaggedUsers = data.data;
@@ -247,7 +247,7 @@ export default {
     },
     async unflagUser(userId) {
       try {
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/admin/operation/unflag_user`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/operation/unflag_user`, {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify({user_id: userId}),
@@ -265,7 +265,7 @@ export default {
     },
     async triggerDailyReminders() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/trigger/daily_remainders", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/trigger/daily_remainders`, {
           method: "POST",
         });
 

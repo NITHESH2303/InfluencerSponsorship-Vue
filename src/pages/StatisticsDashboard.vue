@@ -83,7 +83,7 @@ import {
   CategoryScale,
   LinearScale
 } from 'chart.js';
-import { fetchWithAuth } from "@/api.js";
+import { fetchWithAuth, API_BASE_URL } from "@/api.js";
 
 ChartJS.register(
     Title,
@@ -147,7 +147,7 @@ export default {
     },
     async fetchStatistics() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/statistics");
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/statistics`);
         if (response.ok) {
           const data = await response.json();
           this.stats = data.data.statistics;

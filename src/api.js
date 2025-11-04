@@ -1,3 +1,5 @@
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000';
+
 export async function fetchWithAuth(url, options = {}) {
     const token = localStorage.getItem('access_token');
     const headers = {
@@ -29,7 +31,7 @@ export async function fetchWithAuth(url, options = {}) {
 
 async function refreshAccessToken() {
     try {
-        const response = await fetch("http://127.0.0.1:5000/api/auth/token-refresh", {
+        const response = await fetch(`${API_BASE_URL}/api/auth/token-refresh`, {
             method: "PATCH",
             credentials: "include",
         });

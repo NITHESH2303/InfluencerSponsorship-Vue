@@ -126,7 +126,7 @@
 
 <script>
 import {useToast} from "vue-toastification";
-import {fetchWithAuth} from "@/api.js";
+import {fetchWithAuth, API_BASE_URL} from "@/api.js";
 
 export default {
   name: 'App',
@@ -172,7 +172,7 @@ export default {
     },
     async logout() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/auth/logout", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/auth/logout`, {
           method: "DELETE",
         });
 

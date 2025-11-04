@@ -103,10 +103,10 @@
 
 
 <script>
-import { fetchWithAuth } from "@/api";
+import { fetchWithAuth, API_BASE_URL } from "@/api";
 import {useToast} from "vue-toastification";
 
-const API_BASE = "http://127.0.0.1:5000";
+const API_BASE = API_BASE_URL;
 
 export default {
   props: {

@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api.js";
+import { fetchWithAuth, API_BASE_URL } from "@/api.js";
 import DeleteCampaign from "@/components/Campaign/DeleteCampaign.vue";
 
 export default {
@@ -40,7 +40,7 @@ export default {
   methods: {
     async fetchCampaignData() {
       try {
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/sponsor/campaigns/${this.sponsorId}`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/sponsor/campaigns/${this.sponsorId}`, {
           method: "GET",
         });
         if (response.ok) {

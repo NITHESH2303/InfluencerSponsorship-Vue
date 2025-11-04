@@ -162,7 +162,7 @@
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api";
+import { fetchWithAuth, API_BASE_URL } from "@/api";
 import DeleteCampaign from "@/components/Campaign/DeleteCampaign.vue";
 import {useToast} from "vue-toastification";
 
@@ -216,7 +216,7 @@ export default {
   methods: {
     async fetchNicheOptions() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/niches");
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/niches`);
         if (response.ok) {
           const data = await response.json();
           this.nicheOptions = data.data;
@@ -230,7 +230,7 @@ export default {
     async fetchCampaign() {
       try {
         const response = await fetchWithAuth(
-            `http://127.0.0.1:5000/api/campaigns/${this.campaignId}`
+            `${API_BASE_URL}/api/campaigns/${this.campaignId}`
         );
         if (response.ok) {
           const data = await response.json();
@@ -247,7 +247,7 @@ export default {
       this.isLoading = true;
       try {
         const response = await fetchWithAuth(
-            `http://127.0.0.1:5000/api/campaigns/edit/${this.campaignId}`,
+            `${API_BASE_URL}/api/campaigns/edit/${this.campaignId}`,
             {
               method: "PATCH",
               body: JSON.stringify(this.campaign),
@@ -269,7 +269,7 @@ export default {
       try {
         const toast = useToast();
         const response = await fetchWithAuth(
-            `http://127.0.0.1:5000/api/sponsor/campaigns/${this.campaignId}/status`,
+            `${API_BASE_URL}/api/sponsor/campaigns/${this.campaignId}/status`,
             {
               method: "PUT",
               body: JSON.stringify({status}),

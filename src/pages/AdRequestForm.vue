@@ -96,7 +96,7 @@
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api";
+import { fetchWithAuth, API_BASE_URL } from "@/api";
 import {useToast} from "vue-toastification";
 
 export default {
@@ -129,7 +129,7 @@ export default {
       if (this.isEdit) {
         try {
           const response = await fetchWithAuth(
-              `http://127.0.0.1:5000/api/campaign/${this.campaignId}/adrequests/${this.adId}`
+              `${API_BASE_URL}/api/campaign/${this.campaignId}/adrequests/${this.adId}`
           );
           if (response.ok) {
             const data = await response.json();
@@ -144,7 +144,7 @@ export default {
     },
     async fetchInfluencers() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/influencers/list");
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/influencers/list`);
         if (response.ok) {
           const data = await response.json();
           this.influencers = data.data;
@@ -160,8 +160,8 @@ export default {
       this.error = "";
 
       const url = this.isEdit
-          ? `http://127.0.0.1:5000/api/adrequests/${this.adId}/edit`
-          : `http://127.0.0.1:5000/api/adrequests/${this.adRequest.influencer_id}/new`;
+          ? `${API_BASE_URL}/api/adrequests/${this.adId}/edit`
+          : `${API_BASE_URL}/api/adrequests/${this.adRequest.influencer_id}/new`;
 
       try {
         const response = await fetchWithAuth(url, {

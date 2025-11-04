@@ -212,7 +212,7 @@
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api.js";
+import { fetchWithAuth, API_BASE_URL } from "@/api.js";
 import {useToast} from "vue-toastification";
 
 export default {
@@ -248,7 +248,7 @@ export default {
   methods: {
     async fetchProfile() {
       try {
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/user/profile/${this.userMeta.id}`);
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/user/profile/${this.userMeta.id}`);
         if (response.ok) {
           const data = await response.json();
           this.profile = data.data;
@@ -266,7 +266,7 @@ export default {
     },
     async saveUserDetails() {
       try {
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/user/profile/edit`, {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/user/profile/edit`, {
           method: "PATCH",
           body: JSON.stringify(this.editableProfile),
         });
@@ -287,7 +287,7 @@ export default {
     },
     async saveEmailChange() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/auth/change_auth", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/auth/change_auth`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -311,7 +311,7 @@ export default {
     },
     async savePasswordChange() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/auth/change_password", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/auth/change_password`, {
           method: "PUT",
           body: JSON.stringify({ old_password: this.oldPassword, new_password: this.newPassword }),
         });

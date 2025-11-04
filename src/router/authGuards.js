@@ -1,8 +1,8 @@
-import {fetchWithAuth} from "@/api.js";
+import {fetchWithAuth, API_BASE_URL} from "@/api.js";
 
 export async function checkSponsorVerified(to, from, next) {
     try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/sponsor/meta", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/sponsor/meta`, {
             method: 'GET',
         });
         if (response.ok) {
@@ -32,7 +32,7 @@ export async function checkSponsorVerified(to, from, next) {
 
 export async function getInfluencerMeta(to, from, next) {
     try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/influencer/meta", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/influencer/meta`, {
             method: 'GET',
         });
         if (response.ok) {
@@ -55,7 +55,7 @@ export async function getInfluencerMeta(to, from, next) {
 
 export async function getUserMeta(to, from, next) {
     try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/users/meta", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/users/meta`, {
             method: 'GET',
         });
         if (response.ok) {

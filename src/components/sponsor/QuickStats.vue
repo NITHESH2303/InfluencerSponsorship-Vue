@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api.js";
+import { fetchWithAuth, API_BASE_URL } from "@/api.js";
 
 export default {
   props: {
@@ -77,7 +77,7 @@ export default {
   methods: {
     async fetchCampaignDetails() {
       try {
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/campaigns/${this.campaignId}`);
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/campaigns/${this.campaignId}`);
         if (response.ok) {
           const data = await response.json();
           if (data.data) {

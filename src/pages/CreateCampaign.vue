@@ -114,7 +114,7 @@
 <script>
 import FormInput from '@/components/forms/FormInput.vue';
 import FormTextarea from '@/components/forms/FormTextarea.vue';
-import { fetchWithAuth } from "@/api";
+import { fetchWithAuth, API_BASE_URL } from "@/api";
 
 export default {
   components: {
@@ -144,7 +144,7 @@ export default {
   methods: {
     async fetchNicheOptions() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/niches");
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/niches`);
         if (response.ok) {
           const data = await response.json();
           this.nicheOptions = data.data;
@@ -182,7 +182,7 @@ export default {
       this.error = '';
 
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/campaigns/create_new_campaign", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/campaigns/create_new_campaign`, {
           method: "POST",
           body: JSON.stringify(this.campaign)
         });

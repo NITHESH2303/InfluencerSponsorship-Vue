@@ -47,7 +47,7 @@
 <script>
 import SponsorHeader from '@/components/sponsor/SponsorHeader.vue';
 import CampaignList from '@/components/campaigns/CampaignList.vue';
-import { fetchWithAuth } from "@/api";
+import { fetchWithAuth, API_BASE_URL } from "@/api";
 import CampaignStats from "@/components/Campaign/CampaignStats.vue";
 import RestrictionBanner from "@/components/RestrictionBanner.vue";
 
@@ -77,7 +77,7 @@ export default {
     async fetchCampaignStats() {
       try {
         const response = await fetchWithAuth(
-            `http://127.0.0.1:5000/api/sponsor/stats/${this.sponsorMeta.sponsorid}`
+            `${API_BASE_URL}/api/sponsor/stats/${this.sponsorMeta.sponsorid}`
         );
         if (response.ok) {
           const data = await response.json();
@@ -92,7 +92,7 @@ export default {
     async exportCampaigns() {
       try {
         const response = await fetchWithAuth(
-            `http://127.0.0.1:5000/api/export_campaigns/${this.sponsorMeta.sponsorid}`,
+            `${API_BASE_URL}/api/export_campaigns/${this.sponsorMeta.sponsorid}`,
             {
               method: 'POST',
               headers: {

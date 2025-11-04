@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api";
+import { fetchWithAuth, API_BASE_URL } from "@/api";
 import ListCard from './shared/ListCard.vue';
 import StatusBadge from './shared/StatusBadge.vue';
 
@@ -94,7 +94,7 @@ export default {
     },
     async fetchCampaigns() {
       try {
-        const response = await fetchWithAuth(`http://127.0.0.1:5000/api/sponsor/campaigns/${this.sponsorId}`);
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/sponsor/campaigns/${this.sponsorId}`);
         if (response.ok) {
           const data = await response.json();
           this.campaigns = data.data;
@@ -111,8 +111,8 @@ export default {
     },
     async handleComplete(campaign) {
       try {
-        const response = await fetchWithAuth(
-            `http://127.0.0.1:5000/api/sponsor/campaigns/${campaign.campaign_id}/status`,
+          const response = await fetchWithAuth(
+            `${API_BASE_URL}/api/sponsor/campaigns/${campaign.campaign_id}/status`,
             {
               method: "PUT",
               body: JSON.stringify({ status: 'Completed' })
@@ -128,8 +128,8 @@ export default {
     async handleDelete(campaign) {
       if (confirm('Are you sure you want to delete this campaign?')) {
         try {
-          const response = await fetchWithAuth(
-              `http://127.0.0.1:5000/api/campaigns/${campaign.campaign_id}/delete`,
+              const response = await fetchWithAuth(
+              `${API_BASE_URL}/api/campaigns/${campaign.campaign_id}/delete`,
               { method: "DELETE" }
           );
           if (response.ok) {

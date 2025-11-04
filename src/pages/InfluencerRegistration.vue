@@ -108,7 +108,7 @@
 
 <script>
 import FormTextarea from '@/components/forms/FormTextarea.vue';
-import { fetchWithAuth } from "@/api";
+import { fetchWithAuth, API_BASE_URL } from "@/api";
 
 export default {
   components: { FormTextarea },
@@ -169,7 +169,7 @@ export default {
             profile => profile.platform && profile.username
         );
 
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/register/influencer", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/register/influencer`, {
           method: "POST",
           body: JSON.stringify({
             social_media_profiles: filledProfiles,

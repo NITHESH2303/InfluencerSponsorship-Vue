@@ -204,7 +204,7 @@ export default {
     },
     async updateProfile() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/influencer/profile/edit", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/influencer/profile/edit`, {
           method: "PATCH",
           body: JSON.stringify(this.editForm),
         });

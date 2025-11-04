@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api";
+import { fetchWithAuth, API_BASE_URL } from "@/api";
 import ListCard from './shared/ListCard.vue';
 import StatusBadge from './shared/StatusBadge.vue';
 
@@ -77,7 +77,7 @@ export default {
     },
     async fetchSponsors() {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/sponsors/list");
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/sponsors/list`);
         if (response.ok) {
           const data = await response.json();
           this.sponsors = data.data;
@@ -91,7 +91,7 @@ export default {
       if (!reason) return;
 
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/admin/operation/flag_user", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/operation/flag_user`, {
           method: "POST",
           body: JSON.stringify({
             user_id: sponsor.user_id,
@@ -108,7 +108,7 @@ export default {
     },
     async unflagUser(sponsor) {
       try {
-        const response = await fetchWithAuth("http://127.0.0.1:5000/api/admin/operation/unflag_user", {
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/admin/operation/unflag_user`, {
           method: "POST",
           body: JSON.stringify({
             user_id: sponsor.user_id

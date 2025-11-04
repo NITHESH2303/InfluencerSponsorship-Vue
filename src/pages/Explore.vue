@@ -178,7 +178,7 @@
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api.js";
+import { fetchWithAuth, API_BASE_URL } from "@/api.js";
 import FilterIcon from "@/components/icons/FilterIcon.vue";
 
 export default {
@@ -235,11 +235,11 @@ export default {
         this.defaultListTitle = '';
         switch (type) {
           case 'user':
-            url = 'http://127.0.0.1:5000/api/users';
+            url = `${API_BASE_URL}/api/users`;
             this.defaultListTitle = 'Recent Users';
             break;
           case 'campaign':
-            url = 'http://127.0.0.1:5000/api/campaigns';
+            url = `${API_BASE_URL}/api/campaigns`;
             this.defaultListTitle = 'Active Campaigns';
             break;
         }
@@ -265,7 +265,7 @@ export default {
           }
         }
 
-        const response = await fetch(`http://127.0.0.1:5000/api/search?${params}`, {
+        const response = await fetch(`${API_BASE_URL}/api/search?${params}`, {
           method: 'GET',
         });
 

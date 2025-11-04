@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import { fetchWithAuth } from "@/api.js";
+import { fetchWithAuth, API_BASE_URL } from "@/api.js";
 
 export default {
   data() {
@@ -98,7 +98,7 @@ export default {
 
       if (this.validationErrors.length === 0) {
         try {
-          const response = await fetchWithAuth("http://127.0.0.1:5000/api/auth/login", {
+          const response = await fetchWithAuth(`${API_BASE_URL}/api/auth/login`, {
             method: "POST",
             body: JSON.stringify({
               identifier: this.identifier,
